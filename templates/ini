@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bienvenida - Clínica Veterinaria</title>
+
+    <!-- Bootstrap CSS CDN -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #f7f9fb;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .container {
+            text-align: center;
+            margin-top: 100px;
+        }
+
+        .welcome-section {
+            background-color: #fff;
+            padding: 50px;
+            border-radius: 15px;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .welcome-section h1 {
+            font-size: 36px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .welcome-section p {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .btn-primary, .btn-secondary {
+            width: 150px;
+            padding: 10px;
+            margin: 10px;
+        }
+
+        .logo {
+            max-width: 150px;
+            margin-bottom: 20px;
+        }
+
+        footer {
+            margin-top: 50px;
+            color: #888;
+            font-size: 14px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <!-- Sección de bienvenida -->
+        <div class="welcome-section">
+            <img src="{{ url_for('static', filename='images/fotoClinica.jpg') }}" alt="logo" class="logo">
+            <h1>Bienvenidos a la Clínica Veterinaria</h1>
+            <p>Nos preocupamos por el bienestar de tus mascotas. Aquí puedes gestionar tus citas, consultar tus registros médicos y obtener la mejor atención veterinaria.</p>
+
+            <!-- Botones de acción -->
+            <a href="/login_veterinario" class="btn btn-primary">Iniciar Sesión</a>
+            <a href="/registro_veterinario" class="btn btn-secondary">Registrarse</a>
+        </div>
+
+        <!-- Pie de página -->
+        <footer>
+            © 2024 Clínica Veterinaria. Todos los derechos reservados.
+        </footer>
+    </div>
+
+    <!-- Bootstrap JS CDN -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+
+</html>
