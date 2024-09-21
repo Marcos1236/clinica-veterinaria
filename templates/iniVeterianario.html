@@ -12,6 +12,9 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
 
+    <!-- Font Awesome CDN (para iconos de redes sociales) -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+
     <style>
         body {
             background-color: #f7f9fb;
@@ -35,11 +38,12 @@
             font-size: 36px;
             color: #333;
             margin-bottom: 20px;
+            font-family: 'Roboto';
         }
 
         .welcome-section p {
             font-size: 18px;
-            color: #666;
+            color: #d9534f; 
             margin-bottom: 30px;
         }
 
@@ -50,7 +54,7 @@
         }
 
         .logo {
-            max-width: 150px;
+            max-width: 200px;
             margin-bottom: 20px;
         }
 
@@ -60,30 +64,45 @@
             font-size: 14px;
             text-align: center;
         }
+
+        .social-icons a {
+            margin: 0 10px;
+            color: #555;
+            text-decoration: none;
+            font-size: 20px;
+        }
+
+        .social-icons a:hover {
+            color: #007bff;
+        }
     </style>
 </head>
 
 <body>
 
     <div class="container">
-        <!-- Sección de bienvenida -->
-        <div class="welcome-section">
-            <img src="{{ url_for('static', filename='images/fotoClinica.jpg') }}" alt="logo" class="logo">
-            <h1>Bienvenidos a la Clínica Veterinaria</h1>
-            <p>Nos preocupamos por el bienestar de tus mascotas. Aquí puedes gestionar tus citas, consultar tus registros médicos y obtener la mejor atención veterinaria.</p>
 
-            <!-- Botones de acción -->
-            <a href="/login_veterinario" class="btn btn-primary">Iniciar Sesión</a>
-            <a href="/registro_veterinario" class="btn btn-secondary">Registrarse</a>
+        <div class="welcome-section">
+            <h1>Bienvenidos Veterinarios</h1>
+
+            <img src="https://i.pinimg.com/550x/ed/5f/3a/ed5f3a15d92ba3ac6238a98da42bb01e.jpg" alt="Logo Clínica Veterinaria" class="logo">
+
+            <p>Para registrarte como veterinario, contacte con el administrador para que te proporcione una clave de acceso.</p>
+            
+            <a href="/loginVeterinario" class="btn btn-primary">Iniciar Sesión</a>
+            <a href="/registroVeterinario" class="btn btn-secondary">Registrarse</a>
         </div>
 
-        <!-- Pie de página -->
         <footer>
-            © 2024 Clínica Veterinaria. Todos los derechos reservados.
+            <p>© 2024 Clínica Veterinaria. Todos los derechos reservados.</p>
+            <div class="social-icons">
+                <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i></a>
+                <a href="https://twitter.com" target="_blank"><i class="fab fa-twitter"></i></a>
+                <a href="https://facebook.com" target="_blank"><i class="fab fa-facebook"></i></a>
+            </div>
         </footer>
     </div>
 
-    <!-- Bootstrap JS CDN -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
