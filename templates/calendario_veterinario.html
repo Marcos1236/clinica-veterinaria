@@ -52,12 +52,31 @@
                     $('#chatContainer').scrollTop($('#chatContainer')[0].scrollHeight); // Scroll al final
                 }
             });
-
-            // Simulación de la llegada de un nuevo mensaje (para mostrar el icono)
-            setTimeout(function() {
-                $('#newMessageIcon').removeClass('d-none'); // Mostrar el icono de nuevo mensaje
-            }, 5000); // Simula la llegada de un nuevo mensaje después de 5 segundos
         });
+
+        function loadLayout() {
+            fetch('layout_veterinario.html') // Cambia esto por la ruta a tu archivo de layout
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    document.getElementById('layoutContainer').innerHTML = data;
+                })
+                .catch(error => {
+                    console.error('There was a problem with the fetch operation:', error);
+                });
+        }
+
+        // Llamar a la función para cargar el layout al cargar la página
+        window.onload = loadLayout;
+
+        function openInfo() {
+            var modal = new bootstrap.Modal(document.getElementById('informacion'));
+            modal.show();
+        }
     </script>
 
     <style>
@@ -110,7 +129,7 @@
     </style>
 </head>
 <body>
-    <iframe src="layout_veterinario.html" style="width: 100%; height: 100px;" frameborder="0"></iframe>
+    <div id="layoutContainer"></div>
 
     <div class="container">
         <div class="row">

@@ -7,13 +7,39 @@
     <title>Perfil de Usuario</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://bootswatch.com/5/pulse/bootstrap.min.css" rel="stylesheet">
+
+    <script>
+        function loadLayout() {
+            fetch('layout_cliente.html') // Cambia esto por la ruta a tu archivo de layout
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    document.getElementById('layoutContainer').innerHTML = data;
+                })
+                .catch(error => {
+                    console.error('There was a problem with the fetch operation:', error);
+                });
+        }
+
+        // Llamar a la función para cargar el layout al cargar la página
+        window.onload = loadLayout;
+
+        function openInfo() {
+            var modal = new bootstrap.Modal(document.getElementById('informacion'));
+            modal.show();
+        }
+    </script>
 </head>
 
 <body>
     <div class="container">
         <!-- Layout -->
         <div style="margin-bottom: 20px;">
-            <iframe src="layout_cliente.html" style="width: 100%; height: 100px;" frameborder="0"></iframe>
+            <div id="layoutContainer"></div>
         </div>
 
         <h1 class="text-center">Mi Perfil</h1>
