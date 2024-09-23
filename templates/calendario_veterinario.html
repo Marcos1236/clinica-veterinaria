@@ -24,6 +24,24 @@
                     right: 'dayGridMonth,timeGridWeek,timeGridDay'
                 },
                 events: '', // Aquí poner endpoint desde el cuál se obtendrán las citas de la base de datos
+
+                eventClick: function(info) {
+                    // Mostrar la información de la cita en el modal
+                    document.getElementById('eventTitle').innerText = info.event.title;
+                    document.getElementById('eventDescription').innerText = info.event.extendedProps.description;
+                    document.getElementById('eventStart').innerText = new Date(info.event.start).toLocaleString();
+                    
+                    // Si hay hora de fin, mostrarla
+                    if (info.event.end) {
+                        document.getElementById('eventEnd').innerText = new Date(info.event.end).toLocaleString();
+                    } else {
+                        document.getElementById('eventEnd').innerText = 'No especificada';
+                    }
+
+                    // Abrir el modal
+                    var eventModal = new bootstrap.Modal(document.getElementById('eventInfoModal'));
+                    eventModal.show();
+                }
             });
             calendar.render();
         });
@@ -95,8 +113,8 @@
 
         /* Estilo para las opciones de chat */
         .chat-option {
-            color: #000000;
-            background-color: #f8f9fa; /* Fondo claro */
+            color: #000000 !important;
+            background-color: #f8f9fa !important; /* Fondo claro */
             border: 1px solid #dee2e6; /* Borde para separarlas */
             padding: 10px;
             margin-bottom: 5px;
@@ -104,8 +122,8 @@
         }
 
         .chat-option:hover {
-            color: #000000;
-            background-color: #e9ecef; /* Cambia de color al pasar el mouse */
+            color: #000000 !important;
+            background-color: #e9ecef !important; /* Cambia de color al pasar el mouse */
         }
 
         .fc-toolbar button {
@@ -131,6 +149,25 @@
 <body>
     <div id="layoutContainer"></div>
 
+    <div class="modal fade" id="eventInfoModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true"></div>
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="eventTitle">Título de la cita</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Descripción:</strong> <span id="eventDescription"></span></p>
+                    <p><strong>Inicio:</strong> <span id="eventStart"></span></p>
+                    <p><strong>Fin:</strong> <span id="eventEnd"></span></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
         <div class="row">
             <div class="col-md-3">
@@ -150,8 +187,8 @@
                                 <strong>Chats Disponibles:</strong>
                                 <ul class="list-group">
                                     <!--Aquí iran los clientes que te han hablado-->
-                                    <li class="list-group-item chat-option" data-chat="Cliente 1">Chat con Cliente 1</li>
-                                    <li class="list-group-item chat-option" data-chat="Cliente 2">Chat con Cliente 2</li>
+                                    <li class="list-group-item chat-option" data-chat="Cliente 1">Cliente 1</li>
+                                    <li class="list-group-item chat-option" data-chat="Cliente 2">Cliente 2</li>
                                 </ul>
                             </div>
 
