@@ -20,7 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure--!7o@ros$u*3uj^-8rb-(d7^e(s=i%u)*nc6_4_xac5-5r*q+6'
+SECRET_KEY = 'django-insecure-mcyjmacpg*#gk3gyw8zjbgu^hysu!cq#p+8*sj(ut#a4v2gwpv'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'clinica',
 ]
 
 MIDDLEWARE = [
@@ -75,10 +76,15 @@ WSGI_APPLICATION = 'clinicaVeterinaria.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'clinicaveterinaria',
+        'USER': 'root',
+        'PASSWORD': '',
+        'HOST': 'localhost',  # O la IP de tu servidor MySQL
+        'PORT': '3306',       # Puerto predeterminado de MySQL
     }
 }
+
 
 
 # Password validation
