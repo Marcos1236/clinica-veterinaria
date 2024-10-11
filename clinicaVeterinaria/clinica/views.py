@@ -58,8 +58,26 @@ def calendar(request):
     else:
         return redirect('login')  
 
+@login_required
 def myPets(request):
-    if request.user.is_authenticated:
+    if request.method == 'POST':
+        form = MascotaForm(request.POST, request.FILES)
+        
+        if form.is_valid():
+            cliente = Cliente.objects.get(dni=request.user)
+
+            historial_medico = HistorialMedico.objects.create()
+
+            mascota = form.save(commit=False)
+            mascota.dni = cliente
+            mascota.idH = historial_medico
+            mascota.save()
+
+            return redirect('myPets')
+        else:
+            return render(request, 'clinica/mascotas.html', {'form': form})
+
+    elif request.method == 'GET':
         if Cliente.objects.filter(dni=request.user).exists():
             try:
                 client = Cliente.objects.get(dni=request.user)
@@ -71,38 +89,6 @@ def myPets(request):
                 return HttpResponseForbidden("No tienes permiso para acceder a esta página.")
         else:
             return HttpResponseForbidden("No tienes permiso para acceder a esta página.")
-    else:
-        return redirect('login')
-
-def addPet(request):
-    if request.method == 'POST' and request.user.is_authenticated:
-        nombre = request.POST['petName']
-        edad = request.POST['petAge']
-        raza = request.POST['petBreed']
-        descripcion = request.POST['petDescription']
-        foto = request.FILES.get('petPhoto')
-
-        cliente = Cliente.objects.get(dni=request.user)
-
-        historial_medico = HistorialMedico.objects.create()
-
-        mascota = Mascota(
-            dni=cliente,
-            idH=historial_medico, 
-            nombre=nombre,
-            edad=edad,
-            raza=raza,
-            descripcion=descripcion,
-        )
-
-        if foto:
-            mascota.foto = foto 
-
-        mascota.save()
-
-        return redirect('myPets') 
-
-    return HttpResponseForbidden("No tienes permiso para acceder a esta página.")
 
 def deletePet(request, id):
     if request.user.is_authenticated:

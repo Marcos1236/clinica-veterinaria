@@ -11,7 +11,6 @@ urlpatterns = [
     path("registerClient/", views.registerClient, name="registerClient"),
     path("calendar/", views.calendar, name="calendar"),
     path("myPets/", views.myPets, name="myPets"),
-    path("addPet/", views.addPet, name="addPet"),
     path('deletePet/<int:id>/', views.deletePet, name='deletePet'),
     path("profile/", views.profile, name="profile"),
     path("editProfile/", views.editProfile, name="editProfile"),

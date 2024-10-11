@@ -24,6 +24,19 @@
     {% block content %}
         <div class="container my-4"> 
             <h1 class="text-center">Mis Mascotas</h1>
+
+            {% if form.errors %}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong>Se encontraron algunos errores en el formulario:</strong>
+                <ul>
+                    {% for field, errors in form.errors.items %}
+                        <li>{{ field }}: {{ errors|striptags }}</li>
+                    {% endfor %}
+                </ul>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endif %}
+
             <div class="text-right mb-3">
                 <button class="btn btn-primary" id="btn-add-pet" data-bs-toggle="modal" data-bs-target="#addPetModal">Añadir Mascota</button>
             </div>
@@ -64,27 +77,27 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <form id="addPetForm" enctype="multipart/form-data" action="{% url 'addPet' %}" method="POST">
+                        <form id="addPetForm" enctype="multipart/form-data" action="{% url 'myPets' %}" method="POST">
                             {% csrf_token %}
                             <div class="mb-3">
                                 <label for="petName" class="form-label">Nombre de la Mascota</label>
-                                <input type="text" class="form-control" id="petName" name="petName" required>
+                                <input type="text" class="form-control" id="petName" name="nombre" required>
                             </div>
                             <div class="mb-3">
                                 <label for="petAge" class="form-label">Edad</label>
-                                <input type="number" class="form-control" id="petAge" name="petAge" required>
+                                <input type="number" class="form-control" id="petAge" name="edad" required>
                             </div>
                             <div class="mb-3">
                                 <label for="petBreed" class="form-label">Raza</label>
-                                <input type="text" class="form-control" id="petBreed" name="petBreed" required>
+                                <input type="text" class="form-control" id="petBreed" name="raza" required>
                             </div>
                             <div class="mb-3">
                                 <label for="petDescription" class="form-label">Descripción</label>
-                                <textarea class="form-control" id="petDescription" name="petDescription" rows="3" required></textarea>
+                                <textarea class="form-control" id="petDescription" name="descripcion" rows="3" required></textarea>
                             </div>
                             <div class="mb-3">
                                 <label for="petPhoto" class="form-label">Foto de la Mascota</label>
-                                <input type="file" class="form-control" id="petPhoto" name="petPhoto">
+                                <input type="file" class="form-control" id="petPhoto" name="foto">
                             </div>
                         </form>
                     </div>

@@ -2,6 +2,11 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from .models import *
 
+RAZAS_VALIDAS = [
+    "Labrador Retriever", "Golden Retriever", "Bulldog", "Beagle", "Poodle", 
+    "Chihuahua", "Shih Tzu", "Yorkshire Terrier", "Dachshund", "Boxer"
+]
+
 class RegistroForm(UserCreationForm):
     class Meta:
         model = Usuario
@@ -20,3 +25,14 @@ class RegistroForm(UserCreationForm):
         if commit:
             user.save()
         return user
+    
+class MascotaForm(forms.ModelForm):
+    class Meta:
+        model = Mascota
+        fields = ['nombre', 'edad', 'raza', 'descripcion', 'foto']
+
+    def clean_raza(self):
+        raza = self.cleaned_data.get('raza')
+        if raza not in RAZAS_VALIDAS:
+            raise forms.ValidationError(f"La raza {raza} no es válida. Elige una raza de la lista permitida.")
+        return raza
