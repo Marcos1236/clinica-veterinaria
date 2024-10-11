@@ -9,25 +9,6 @@
     <link href="https://bootswatch.com/5/pulse/bootstrap.min.css" rel="stylesheet">
 
     <script>
-        function loadLayout() {
-            fetch('layout_cliente.html') // Cambia esto por la ruta a tu archivo de layout
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.text();
-                })
-                .then(data => {
-                    document.getElementById('layoutContainer').innerHTML = data;
-                })
-                .catch(error => {
-                    console.error('There was a problem with the fetch operation:', error);
-                });
-        }
-
-        // Llamar a la función para cargar el layout al cargar la página
-        window.onload = loadLayout;
-
         function openInfo() {
             var modal = new bootstrap.Modal(document.getElementById('informacion'));
             modal.show();
@@ -36,105 +17,108 @@
 </head>
 
 <body>
-    <div class="container">
-        <!-- Layout -->
-        <div style="margin-bottom: 20px;">
-            <div id="layoutContainer"></div>
-        </div>
+    {% extends 'layout_cliente.html' %}
+    {% load static %}
+    
+    {% block content %}
+        <div class="container">
+            <!-- Layout -->
+            <div style="margin-bottom: 20px;">
+                <div id="layoutContainer"></div>
+            </div>
 
-        <h1 class="text-center">Mi Perfil</h1>
+            <h1 class="text-center">Mi Perfil</h1>
 
-        <ul class="nav nav-tabs" id="perfilTabs" role="tablist">
-            <li class="nav-item">
-                <button class="nav-link active" id="datos-personales-tab" data-bs-toggle="tab" data-bs-target="#datos-personales" type="button" role="tab" aria-controls="datos-personales" aria-selected="true">Datos Personales</button>
-            </li>
-            <li class="nav-item">
-                <button class="nav-link" id="cambiar-contrasena-tab" data-bs-toggle="tab" data-bs-target="#cambiar-contrasena" type="button" role="tab" aria-controls="cambiar-contrasena" aria-selected="false">Cambiar Contraseña</button>
-            </li>
-        </ul>
+            <ul class="nav nav-tabs" id="perfilTabs" role="tablist">
+                <li class="nav-item">
+                    <button class="nav-link active" id="datos-personales-tab" data-bs-toggle="tab" data-bs-target="#datos-personales" type="button" role="tab" aria-controls="datos-personales" aria-selected="true">Datos Personales</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" id="cambiar-contrasena-tab" data-bs-toggle="tab" data-bs-target="#cambiar-contrasena" type="button" role="tab" aria-controls="cambiar-contrasena" aria-selected="false">Cambiar Contraseña</button>
+                </li>
+            </ul>
 
-        <div class="tab-content mt-3" id="perfilTabsContent">
+            <div class="tab-content mt-3" id="perfilTabsContent">
 
-            <!-- Pestaña de Datos Personales -->
-            <div class="tab-pane fade show active" id="datos-personales" role="tabpanel" aria-labelledby="datos-personales-tab">
-                <div class="row justify-content-center">
-                    <div class="col-md-6">
-                        <!-- Imagen de perfil -->
-                        <img src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png" 
-                             alt="Imagenperfil" 
-                             style="display: block; margin: 0 auto 15px auto; width: 130px; height: 130px; border-radius: 50%; object-fit: cover; border: 3px;">
+                <!-- Pestaña de Datos Personales -->
+                <div class="tab-pane fade show active" id="datos-personales" role="tabpanel" aria-labelledby="datos-personales-tab">
+                    <div class="row justify-content-center">
+                        <div class="col-md-6">
+                            <!-- Imagen de perfil -->
+                            <img src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png" 
+                                alt="Imagenperfil" 
+                                style="display: block; margin: 0 auto 15px auto; width: 130px; height: 130px; border-radius: 50%; object-fit: cover; border: 3px;">
 
-                             <div class="form-group" style="margin-bottom: 10px;">
-                                <label for="profile-image" class="form-label">Foto de perfil</label>
-                                <input type="file" class="form-control" id="Imagenperfil">
-                            </div>
+                                <div class="form-group" style="margin-bottom: 10px;">
+                                    <label for="profile-image" class="form-label">Foto de perfil</label>
+                                    <input type="file" class="form-control" id="Imagenperfil">
+                                </div>
 
-                        <form action="/updatePerfilUsuario" method="POST">
-                            <!-- Nombre -->
-                            <div class="form-group" style="margin-bottom: 25px;">
-                                <label for="nombre">Nombre:</label>
-                                <input type="text" class="form-control" id="nombre" name="nombre" value="Juan Pérez" required>
-                            </div>
+                            <form action="{% url 'editProfile' %}" enctype="multipart/form-data" method="POST">
+                                <!-- Nombre -->
+                                <div class="form-group" style="margin-bottom: 25px;">
+                                    <label for="nombre">Nombre:</label>
+                                    <input type="text" class="form-control" id="nombre" name="first_name" value="{{ usuario.first_name }}" required>
+                                </div>
 
-                            <!-- Correo Electrónico -->
-                            <div class="form-group" style="margin-bottom: 20px;">
-                                <label for="email">Correo Electrónico:</label>
-                                <input type="email" class="form-control" id="email" name="email" value="juan.perez@gmail.com" required>
-                            </div>
+                                <!-- Correo Electrónico -->
+                                <div class="form-group" style="margin-bottom: 20px;">
+                                    <label for="email">Correo Electrónico:</label>
+                                    <input type="email" class="form-control" id="email" name="email" value="{{ usuario.email }}" required>
+                                </div>
 
-                            <!-- Teléfono -->
-                            <div class="form-group" style="margin-bottom: 20px;">
-                                <label for="telefono">Teléfono:</label>
-                                <input type="tel" class="form-control" id="telefono" name="telefono" value="123456789" required>
-                            </div>
+                                <!-- Teléfono -->
+                                <div class="form-group" style="margin-bottom: 20px;">
+                                    <label for="telefono">Teléfono:</label>
+                                    <input type="tel" class="form-control" id="telefono" name="telefono" value="{{ usuario.telefono }}" required>
+                                </div>
 
-                            <!-- Dirección -->
-                            <div class="form-group" style="margin-bottom: 20px;">
-                                <label for="direccion">Dirección:</label>
-                                <input type="text" class="form-control" id="direccion" name="direccion" value="Calle Falsa 123" required>
-                            </div>
+                                <!-- Dirección -->
+                                <div class="form-group" style="margin-bottom: 20px;">
+                                    <label for="direccion">Dirección:</label>
+                                    <input type="text" class="form-control" id="direccion" name="direccion" value="{{ usuario.direccion }}" required>
+                                </div>
 
-                            <!-- Botón para actualizar información -->
-                            <button type="submit" class="btn btn-primary d-block mx-auto" style="width: 30% ">Actualizar</button>
-                        </form>
+                                <!-- Botón para actualizar información -->
+                                <button type="submit" class="btn btn-primary d-block mx-auto" style="width: 30% ">Actualizar</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pestaña de Cambiar Contraseña -->
+                <div class="tab-pane fade" id="cambiar-contrasena" role="tabpanel" aria-labelledby="cambiar-contrasena-tab">
+                    <div class="row justify-content-center">
+                        <div class="col-md-6">
+                            <form action="/updatePassword" method="POST">
+
+                                <!-- Contraseña Actual -->
+                                <div class="form-group" style="margin-bottom: 20px;">
+                                    <label for="passwordActual">Contraseña Actual:</label>
+                                    <input type="password" class="form-control" id="passwordActual" name="passwordActual" required>
+                                </div>
+
+                                <!-- Nueva Contraseña -->
+                                <div class="form-group" style="margin-bottom: 20px;">
+                                    <label for="password">Nueva Contraseña:</label>
+                                    <input type="password" class="form-control" id="password" name="password" required>
+                                </div>
+
+                                <!-- Confirmar Nueva Contraseña -->
+                                <div class="form-group" style="margin-bottom: 20px;">
+                                    <label for="confirmPassword">Confirmar Nueva Contraseña:</label>
+                                    <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
+                                </div>
+
+                                <!-- Botón para actualizar contraseña -->
+                                <button type="submit" class="btn btn-primary d-block mx-auto" style="width: 30% ">Actualizar</button>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
-
-            <!-- Pestaña de Cambiar Contraseña -->
-            <div class="tab-pane fade" id="cambiar-contrasena" role="tabpanel" aria-labelledby="cambiar-contrasena-tab">
-                <div class="row justify-content-center">
-                    <div class="col-md-6">
-                        <form action="/updatePassword" method="POST">
-
-                            <!-- Contraseña Actual -->
-                            <div class="form-group" style="margin-bottom: 20px;">
-                                <label for="passwordActual">Contraseña Actual:</label>
-                                <input type="password" class="form-control" id="passwordActual" name="passwordActual" required>
-                            </div>
-
-                            <!-- Nueva Contraseña -->
-                            <div class="form-group" style="margin-bottom: 20px;">
-                                <label for="password">Nueva Contraseña:</label>
-                                <input type="password" class="form-control" id="password" name="password" required>
-                            </div>
-
-                            <!-- Confirmar Nueva Contraseña -->
-                            <div class="form-group" style="margin-bottom: 20px;">
-                                <label for="confirmPassword">Confirmar Nueva Contraseña:</label>
-                                <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
-                            </div>
-
-                            <!-- Botón para actualizar contraseña -->
-                            <button type="submit" class="btn btn-primary d-block mx-auto" style="width: 30% ">Actualizar</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
         </div>
-    </div>
-
+    {% endblock %}
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>

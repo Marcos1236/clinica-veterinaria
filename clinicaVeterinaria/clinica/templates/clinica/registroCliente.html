@@ -22,24 +22,37 @@
                 <h1 class="text-center mb-3" style="font-size: 20px;">Registro de Usuario</h1>
 
                 <!-- Formulario de Registro -->
-                <form action="/registro" method="POST" class="formulario">
-                    <!-- Datos Personales -->
+                <form action="{% url 'registerClient' %}" method="POST" class="formulario">
+                    {% csrf_token %}
+
                     <h2 class="h6 mb-2">Datos Personales</h2>
 
                     <div class="row">
                         <div class="col-md-6 mb-2">
                             <label for="nombre" class="form-label">Nombre:</label>
-                            <input type="text" class="form-control form-control-sm" id="nombre" name="nombre" required>
+                            <input type="text" class="form-control form-control-sm" id="nombre" name="first_name" required>
                         </div>
                         <div class="col-md-6 mb-2">
                             <label for="apellidos" class="form-label">Apellidos:</label>
-                            <input type="text" class="form-control form-control-sm" id="apellidos" name="apellidos" required>
+                            <input type="text" class="form-control form-control-sm" id="apellidos" name="last_name" required>
                         </div>
                     </div>
 
                     <div class="mb-2">
+                        <label for="dni" class="form-label">DNI:</label>
+                        <input type="text" class="form-control form-control-sm" id="dni" name="dni" required>
+                    </div>
+
+                    <div class="mb-2">
                         <label for="correo" class="form-label">Correo electrónico:</label>
-                        <input type="email" class="form-control form-control-sm" id="correo" name="correo" required>
+                        <input type="email" class="form-control form-control-sm" id="correo" name="email" value="{{ form.correo.value|default_if_none:'' }}" required>
+                        {% if form.correo.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.correo.errors %}
+                                    <li class="text-danger">{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
                     </div>
 
                     <div class="mb-2">
@@ -51,7 +64,7 @@
                     <div class="row">
                         <div class="col-md-6 mb-2">
                             <label for="calle" class="form-label">Calle y Número:</label>
-                            <input type="text" class="form-control form-control-sm" id="calle" name="calle" required>
+                            <input type="text" class="form-control form-control-sm" id="calle" name="direccion" required>
                         </div>
                         <div class="col-md-6 mb-2">
                             <label for="ciudad" class="form-label">Ciudad:</label>
@@ -81,19 +94,40 @@
                     <div class="row">
                         <div class="col-md-6 mb-2">
                             <label for="usuario" class="form-label">Nombre de usuario:</label>
-                            <input type="text" class="form-control form-control-sm" id="usuario" name="nombre_usuario" required>
+                            <input type="text" class="form-control form-control-sm" id="usuario" name="username" value="{{ form.username.value|default_if_none:'' }}" required>
+                            {% if form.username.errors %}
+                                <ul class="errorlist">
+                                    {% for error in form.username.errors %}
+                                        <li class="text-danger">{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
                         </div>
-
+                
                         <div class="col-md-6 mb-2">
                             <label for="contraseña" class="form-label">Contraseña:</label>
-                            <input type="password" class="form-control form-control-sm" id="contraseña" name="contraseña" required>
+                            <input type="password" class="form-control form-control-sm" id="contraseña" name="password1" required>
+                            {% if form.password1.errors %}
+                                <ul class="errorlist">
+                                    {% for error in form.password1.errors %}
+                                        <li class="text-danger">{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
                         </div>
                     </div>
-
+                
                     <div class="row">
                         <div class="col-md-6 mb-2">
                             <label for="repetir_contraseña" class="form-label">Repetir contraseña:</label>
-                            <input type="password" class="form-control form-control-sm" id="repetir_contraseña" name="repetir_contraseña" required>
+                            <input type="password" class="form-control form-control-sm" id="repetir_contraseña" name="password2" required>
+                            {% if form.password2.errors %}
+                                <ul class="errorlist">
+                                    {% for error in form.password2.errors %}
+                                        <li class="text-danger">{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
                         </div>
                     </div>
 
