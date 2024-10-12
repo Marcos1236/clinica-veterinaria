@@ -21,25 +21,29 @@
             <div class="card-body p-4">
                 <h1 class="text-center mb-3" style="font-size: 20px;">Registro de Veterinario</h1>
 
-                <!-- Formulario de Registro -->
-                <form action="/registro_veterinario" method="POST" class="formulario">
-                    <!-- Datos Personales -->
+                <form action="{% url 'registerVet' %}" method="POST" class="formulario">
+                    {% csrf_token %}
                     <h2 class="h6 mb-2">Datos Personales</h2>
 
                     <div class="row">
                         <div class="col-md-6 mb-2">
                             <label for="nombre" class="form-label">Nombre:</label>
-                            <input type="text" class="form-control form-control-sm" id="nombre" name="nombre" required>
+                            <input type="text" class="form-control form-control-sm" id="nombre" name="first_name" required>
                         </div>
                         <div class="col-md-6 mb-2">
                             <label for="apellidos" class="form-label">Apellidos:</label>
-                            <input type="text" class="form-control form-control-sm" id="apellidos" name="apellidos" required>
+                            <input type="text" class="form-control form-control-sm" id="apellidos" name="last_name" required>
                         </div>
                     </div>
 
                     <div class="mb-2">
+                        <label for="dni" class="form-label">DNI:</label>
+                        <input type="text" class="form-control form-control-sm" id="dni" name="dni" required>
+                    </div>
+
+                    <div class="mb-2">
                         <label for="correo" class="form-label">Correo electrónico:</label>
-                        <input type="email" class="form-control form-control-sm" id="correo" name="correo" required>
+                        <input type="email" class="form-control form-control-sm" id="correo" name="email" required>
                     </div>
 
                     <div class="mb-2">
@@ -63,7 +67,7 @@
                     <div class="row">
                         <div class="col-md-6 mb-2">
                             <label for="calle" class="form-label">Calle y Número:</label>
-                            <input type="text" class="form-control form-control-sm" id="calle" name="calle" required>
+                            <input type="text" class="form-control form-control-sm" id="calle" name="direccion" required>
                         </div>
                         <div class="col-md-6 mb-2">
                             <label for="ciudad" class="form-label">Ciudad:</label>
@@ -93,18 +97,23 @@
 
                     <div class="mb-2">
                         <label for="nombre_usuario" class="form-label">Nombre de usuario:</label>
-                        <input type="text" class="form-control form-control-sm" id="nombre_usuario" name="nombre_usuario" required>
+                        <input type="text" class="form-control form-control-sm" id="nombre_usuario" name="username" required>
                     </div>
 
                     <div class="row">
                         <div class="col-md-6 mb-2">
                             <label for="contraseña" class="form-label">Contraseña:</label>
-                            <input type="password" class="form-control form-control-sm" id="contraseña" name="contraseña" required>
+                            <input type="password" class="form-control form-control-sm" id="contraseña" name="password1" required>
                         </div>
                         <div class="col-md-6 mb-2">
                             <label for="repetir_contraseña" class="form-label">Repetir contraseña:</label>
-                            <input type="password" class="form-control form-control-sm" id="repetir_contraseña" name="repetir_contraseña" required>
+                            <input type="password" class="form-control form-control-sm" id="repetir_contraseña" name="password2" required>
                         </div>
+                    </div>
+
+                    <h2 class="h6 mt-2 mb-2">Código de Registro</h2>
+                    <div class="mb-2">
+                        <input type="text" class="form-control form-control-sm" id="codigo_registro" name="codigo_registro" required>
                     </div>
 
                     <button type="submit" class="btn btn-primary w-100 btn-sm mt-2">Registrarse</button>

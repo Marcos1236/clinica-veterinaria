@@ -65,13 +65,22 @@ class Citas(models.Model):
         "R": "Rutinaria",
     }
 
-    id = models.CharField(max_length=15, primary_key=True)
+    id = models.AutoField(primary_key=True)
     idM = models.ForeignKey(Mascota, on_delete=models.CASCADE)
-    dni = models.ForeignKey(Veterinario, on_delete=models.CASCADE)
+    dni = models.ForeignKey(Veterinario, on_delete=models.CASCADE, null=True, blank=True)
+    nombre = models.CharField(max_length=100)
     fecha = models.DateTimeField()
+    hora = models.TimeField()
     motivo = models.CharField(max_length=255)
-    aceptada = models.BooleanField()
+    aceptada = models.BooleanField(default=False)
     tipo = models.CharField(max_length=1, choices=TIPO_CONSULTA)
 
     def __str__(self):
         return f"Cita: {self.id} - {self.motivo}"
+
+class CodigoRegistro(models.Model):
+    codigo = models.CharField(max_length=50, unique=True)
+    utilizado = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.codigo

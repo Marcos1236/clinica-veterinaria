@@ -1,3 +1,5 @@
+{% extends 'layout_cliente.html' %}
+{% block content %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -11,9 +13,18 @@
 
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script id="calendar-events" type="application/json">
+        {{ events|safe }}
+    </script>
+    
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             var calendarEl = document.getElementById('calendar');
+            var events = JSON.parse(document.getElementById('calendar-events').textContent);
             var calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
                 themeSystem: 'bootstrap5',
@@ -24,30 +35,21 @@
                     center: 'title',
                     right: 'dayGridMonth,timeGridWeek,timeGridDay'
                 },
-                events: [
-                    {
-                        title: 'Cita Veterinaria',
-                        start: '2024-09-25T10:00:00',  // Fecha y hora de inicio
-                        end: '2024-09-25T11:00:00',    // Fecha y hora de fin (opcional)
-                        description: 'Consulta con el veterinario para revisión general.',
-                        color: '#ff5722'  // Color personalizado para la cita
-                    }
-                ], // Aquí poner endpoint desde el cuál se obtendrán las citas de la base de datos
+                events: events,
 
                 eventClick: function(info) {
-                    // Mostrar la información de la cita en el modal
-                    document.getElementById('eventTitle').innerText = info.event.title;
-                    document.getElementById('eventDescription').innerText = info.event.extendedProps.description;
-                    document.getElementById('eventStart').innerText = new Date(info.event.start).toLocaleString();
-                    
-                    // Si hay hora de fin, mostrarla
-                    if (info.event.end) {
-                        document.getElementById('eventEnd').innerText = new Date(info.event.end).toLocaleString();
-                    } else {
-                        document.getElementById('eventEnd').innerText = 'No especificada';
-                    }
+                    event = info.event;
 
-                    // Abrir el modal
+                    document.getElementById('eventPet').innerText = event.extendedProps.extraParams.mascota;
+                    document.getElementById('eventTitle').innerText = event.title;
+                    document.getElementById('eventDescription').innerText = event.extendedProps.description;
+                    document.getElementById('eventStart').innerText = new Date(event.start).toLocaleString();
+                    document.getElementById('eventEnd').innerText = new Date(event.end).toLocaleString();
+                    document.getElementById('eventAccepted').innerText = event.extendedProps.extraParams.accepted ? 'Aceptada' : 'Pendiente';
+
+                    var type = event.extendedProps.extraParams.type;
+                    document.getElementById('eventType').innerText = (type === 'U') ? 'Urgente' : (type === 'R') ? 'Rutinaria' : 'No especificado';
+
                     var eventModal = new bootstrap.Modal(document.getElementById('eventInfoModal'));
                     eventModal.show();
                 }
@@ -61,13 +63,10 @@
         });
 
         function filterEvents() {
-            // Obtener valores seleccionados
             const selectedFilters = [];
             $('input[type="checkbox"]:checked').each(function() {
                 selectedFilters.push($(this).val());
             });
-
-            // Lógica para filtrar las citas en el calendario
         }
 
         $(document).ready(function() {
@@ -153,42 +152,55 @@
     </style>
 </head>
 <body>
+    {% if form.errors %}
+        <div class="alert alert-danger alert-dismissible fade show" role="alert" style="max-width: 1200px; margin: 20px auto;">
+            <button type="button" class="btn-close" data-dismiss="alert" aria-label="Close"></button>
+            <ul>
+                {% for field, errors in form.errors.items %}
+                    <li>{{ field }}: {{ errors|striptags }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
 
-    {% extends 'layout_cliente.html' %}
+
+
+
+    <div class="modal fade" id="crearCitaModal" tabindex="-1" aria-labelledby="crearCitaModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="crearCitaModalLabel">Crear Cita</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
     
-    {% block content %}
-        <div class="modal fade" id="crearCitaModal" tabindex="-1" aria-labelledby="crearCitaModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="crearCitaModalLabel">Crear Cita</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
+                <div class="modal-body">
+                    <form id="crearCitaForm" action="{% url 'calendar' %}" method="POST">
+                        {% csrf_token %}
 
-                    <div class="modal-body">
-                        <form id="crearCitaForm">
-                            <div class="mb-3">
-                                <label for="nombreCitaCrear" class="form-label">Nombre de la Cita</label>
-                                <input type="text" class="form-control" id="nombreCitaCrear" required>
-                            </div>
-
-                            <div class="mb-3" id="elegirMascota">
-                                <select class="form-select" id="mascotaFiltro" aria-label="Seleccionar Mascota">
-                                    <option value="">Seleccione una mascota</option>
-                                    <option value="mascota1">Mascota 1</option>
-                                    <option value="mascota2">Mascota 2</option>
-                                    <option value="mascota3">Mascota 3</option>
-                                </select>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="fechaCitaCrear" class="form-label">Fecha</label>
-                                <input type="date" class="form-control" id="fechaCitaCrear" required>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="horaCitaCrear" class="form-label">Hora</label>
-                                <select class="form-select" id="horaCitaCrear" required>
+                        <div class="mb-3">
+                            <label for="nombreCitaCrear" class="form-label">Nombre de la Cita</label>
+                            <input type="text" class="form-control" id="nombre" name="nombre" required>
+                        </div>
+    
+                        <div class="mb-3" id="elegirMascota">
+                            <label for="mascota" class="form-label">Seleccionar Mascota</label>
+                            <select class="form-select" id="mascota" aria-label="Seleccionar Mascota" name="idM">
+                                <option value="">Seleccione una mascota</option>
+                                {% for mascota in mascotas %}
+                                    <option value="{{ mascota.id }}">{{ mascota.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+    
+                        <div class="mb-3">
+                            <label for="fechaCitaCrear" class="form-label">Fecha</label>
+                            <input type="date" class="form-control" id="fecha" name="fecha" required>
+                        </div>
+    
+                        <div class="mb-3">
+                            <label for="horaCitaCrear" class="form-label">Hora</label>
+                            <select class="form-select" id="hora" name="hora" required>
                                 <option value="">Seleccione una hora</option>
                                 <option value="08:00">08:00</option>
                                 <option value="09:00">09:00</option>
@@ -199,14 +211,28 @@
                                 <option value="17:00">17:00</option>
                                 <option value="18:00">18:00</option>
                                 <option value="19:00">19:00</option>
-                                </select>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Crear</button>
-                        </form>
-                    </div>
+                            </select>
+                        </div>
+    
+                        <div class="mb-3">
+                            <label for="motivo" class="form-label">Motivo</label>
+                            <textarea class="form-control" id="motivo" rows="3" name="motivo" required></textarea>
+                        </div>
+    
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="tipo" name="tipo">
+                            <label class="form-check-label" for="tipo">
+                                Urgente
+                            </label>
+                        </div>
+    
+                        <button type="submit" class="btn btn-primary">Crear</button>
+                    </form>
                 </div>
             </div>
         </div>
+    </div>
+    
 
         <!-- Modal Modificar Cita -->
         <div class="modal fade" id="modificarCitaModal" tabindex="-1" aria-labelledby="modificarCitaModalLabel" aria-hidden="true">
@@ -223,7 +249,6 @@
                                 <label for="citaModificar" class="form-label">Seleccionar Cita a Modificar</label>
                                 <select class="form-select" id="citaModificar" required>
                                     <option value="">Seleccione una cita</option>
-                                    <!-- Aquí se llenarían las opciones desde la base de datos -->
                                 </select>
                             </div>
 
@@ -262,14 +287,13 @@
                         <h5 class="modal-title" id="eliminarCitaModalLabel">Eliminar Cita</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-
                     <div class="modal-body">
-                        <form id="eliminarCitaForm">
+                        <form id="eliminarCitaForm" action="{% url 'deleteEvent' %}" method="POST">
+                            {% csrf_token %}
                             <div class="mb-3">
                                 <label for="citaEliminar" class="form-label">Seleccionar Cita a Eliminar</label>
-                                <select class="form-select" id="citaEliminar" required>
+                                <select class="form-select" id="citaEliminar" name="cita_id" required>
                                     <option value="">Seleccione una cita</option>
-                                    <!-- Aquí se llenarían las opciones desde la base de datos -->
                                 </select>
                             </div>
                             <button type="submit" class="btn btn-danger">Eliminar</button>
@@ -279,6 +303,31 @@
             </div>
         </div>
 
+        <script>
+            const events = JSON.parse('{{ events|escapejs }}');
+
+            function llenarSelectCitas(selectId) {
+                const citaSelect = document.getElementById(selectId);
+                events.forEach(event => {
+                    const option = document.createElement('option');
+                    option.value = event.id;
+
+                    const nombreCompleto = event.title || 'Sin nombre';
+                    const nombre = nombreCompleto.includes('Cita: ') ? nombreCompleto.split('Cita: ')[1].trim() : nombreCompleto;
+
+                    const nombreMascota = event.extraParams.mascota || 'Sin mascota';
+                    const fecha = new Date(event.start).toLocaleDateString(); 
+                    const hora = new Date(event.start).toLocaleTimeString(); 
+
+                    option.textContent = `${nombre} - ${nombreMascota} - ${fecha} - ${hora}`;
+                    citaSelect.appendChild(option);
+                });
+            }
+            llenarSelectCitas('citaEliminar');
+            llenarSelectCitas('citaModificar');
+        </script>
+        
+
         <div class="modal fade" id="eventInfoModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -287,9 +336,12 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
+                        <p><strong>Macota:</strong> <span id="eventPet"></span></p>
                         <p><strong>Descripción:</strong> <span id="eventDescription"></span></p>
                         <p><strong>Inicio:</strong> <span id="eventStart"></span></p>
                         <p><strong>Fin:</strong> <span id="eventEnd"></span></p>
+                        <p><strong>Estado:</strong> <span id="eventAccepted"></span></p>
+                        <p><strong>Tipo de cita:</strong> <span id="eventType"></span></p>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
@@ -327,9 +379,9 @@
                         <div class="collapse mt-2" id="filtrarMascota">
                             <select class="form-select" id="mascotaFiltro" aria-label="Seleccionar Mascota">
                                 <option value="">Seleccione una mascota</option>
-                                <option value="mascota1">Mascota 1</option>
-                                <option value="mascota2">Mascota 2</option>
-                                <option value="mascota3">Mascota 3</option>
+                                {% for mascota in mascotas %}
+                                    <option value="{{ mascota.id }}">{{ mascota.nombre }}</option>
+                                {% endfor %}
                             </select>
                         </div>
 
@@ -364,9 +416,9 @@
                 </div>
             </div>
         </div>
-    {% endblock %}
 
     <!-- Scripts de Bootstrap -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+{% endblock %}
