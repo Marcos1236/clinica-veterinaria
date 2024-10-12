@@ -106,56 +106,61 @@ def logout(request):
 @login_required
 def calendar(request):
     user = Usuario.objects.get(dni=request.user.dni)
-    
+
     if Cliente.objects.filter(dni=request.user).exists():
         mascotas = Mascota.objects.filter(dni=user.dni)
         citas = Citas.objects.filter(idM__in=mascotas)
 
         if request.method == 'POST':
-            form = CitaForm(request.POST)
-            if form.is_valid():
-                cita = form.save(commit=False)
+            mascota = request.POST.get('mascota')
 
-                if 'tipo' in request.POST:
-                    cita.tipo = 'U'
-                else:
-                    cita.tipo = 'R'
-
-                cita.save()
-                return redirect('calendar') 
+            if 'clear_filter' in request.POST:
+                citas = Citas.objects.filter(idM__in=mascotas) 
+            elif mascota:
+                citas = Citas.objects.filter(idM_id=mascota)
             else:
-                print(form.errors)
+                form = CitaForm(request.POST)
+                if form.is_valid():
+                    cita = form.save(commit=False)
+                    cita.tipo = 'U' if 'tipo' in request.POST else 'R'
+                    cita.save()
+                    return redirect('calendar') 
         
-        else:
-            form = CitaForm()
+        form = CitaForm()
+        events = generate_events(citas)
 
-        events = []
-        for cita in citas:
-            start_datetime = datetime.combine(cita.fecha, cita.hora)  
-            end_datetime = start_datetime + timedelta(hours=1)  
-
-            events.append({
-                'id': cita.id,
-                'start': start_datetime.strftime("%Y-%m-%dT%H:%M:%S"),  
-                'end': end_datetime.strftime("%Y-%m-%dT%H:%M:%S"),  
-                'title': f'Cita: {cita.nombre}',
-                'description': cita.motivo,
-                'extraParams': {
-                    'accepted': cita.aceptada,
-                    'type': cita.tipo,
-                    'mascota': Mascota.objects.get(id=cita.idM_id).nombre,
-                },
-            })
         context = {
-            'events': json.dumps(events),  
+            'events': json.dumps(events),
             'form': form,
             'mascotas': mascotas,
         }
-        return render(request, 'clinica/calendario_cliente.html',context)
+        return render(request, 'clinica/calendario_cliente.html', context)
 
     elif Veterinario.objects.filter(dni=request.user).exists():
         citas = Citas.objects.filter(dni=user.dni)
-        return render(request, 'clinica/calendario_veterinario.html',{'citas': citas})   
+        return render(request, 'clinica/calendario_veterinario.html', {'citas': citas})
+
+def generate_events(citas):
+    """Genera eventos para el calendario a partir de las citas."""
+    events = []
+    for cita in citas:
+        start_datetime = datetime.combine(cita.fecha, cita.hora)
+        end_datetime = start_datetime + timedelta(hours=1)
+
+        events.append({
+            'id': cita.id,
+            'start': start_datetime.strftime("%Y-%m-%dT%H:%M:%S"),
+            'end': end_datetime.strftime("%Y-%m-%dT%H:%M:%S"),
+            'title': f'Cita: {cita.nombre}',
+            'description': cita.motivo,
+            'extraParams': {
+                'accepted': cita.aceptada,
+                'type': cita.tipo,
+                'mascota': Mascota.objects.get(id=cita.idM_id).nombre,
+            },
+        })
+    return events
+  
 
 @login_required
 def deleteEvent(request):
@@ -251,3 +256,6 @@ def myAppointments(request):
         layout = "clinica/layout_veterinario.html"
     return render(request, 'clinica/citas.html', {'layout': layout}) 
 
+@login_required
+def myRequests(request):
+    return render(request, 'clinica/solicitudes.html') 

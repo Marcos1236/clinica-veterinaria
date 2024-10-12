@@ -376,14 +376,19 @@
                         </button>
 
                         <!-- Contenido Filtrar por Mascota -->
-                        <div class="collapse mt-2" id="filtrarMascota">
-                            <select class="form-select" id="mascotaFiltro" aria-label="Seleccionar Mascota">
-                                <option value="">Seleccione una mascota</option>
-                                {% for mascota in mascotas %}
-                                    <option value="{{ mascota.id }}">{{ mascota.nombre }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
+
+                        <form method="POST" id="filtrarMascotaForm">
+                            {% csrf_token %}
+                            <div class="collapse mt-2" id="filtrarMascota">
+                                <select class="form-select" id="mascotaFiltro" name="mascota" aria-label="Seleccionar Mascota" onchange="document.getElementById('filtrarMascotaForm').submit();">
+                                    <option value="">Seleccione una mascota</option>
+                                    {% for mascota in mascotas %}
+                                        <option value="{{ mascota.id }}">{{ mascota.nombre }}</option>
+                                    {% endfor %}
+                                </select>
+                                <button type="submit" name="clear_filter" class="btn btn-secondary mt-2 w-100">Quitar Filtros</button>
+                            </div>
+                        </form>                                                               
 
                         <!-- Botón para Chat -->
                         <button id="chatDropdownButton" class="btn btn-primary mt-4 w-100">

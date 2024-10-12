@@ -12,25 +12,6 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
     <script>
-        function loadLayout() {
-            fetch('layout_veterinario.html') // Cambia esto por la ruta a tu archivo de layout
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.text();
-                })
-                .then(data => {
-                    document.getElementById('layoutContainer').innerHTML = data;
-                })
-                .catch(error => {
-                    console.error('There was a problem with the fetch operation:', error);
-                });
-        }
-
-        // Llamar a la función para cargar el layout al cargar la página
-        window.onload = loadLayout;
-
         function openInfo() {
             var modal = new bootstrap.Modal(document.getElementById('informacion'));
             modal.show();

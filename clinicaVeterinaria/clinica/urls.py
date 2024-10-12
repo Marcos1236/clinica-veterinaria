@@ -18,6 +18,7 @@ urlpatterns = [
     path("profile/", views.profile, name="profile"),
     path("editProfile/", views.editProfile, name="editProfile"),
     path("myAppointments/", views.myAppointments, name="myAppointments"),
+    path("myRequests/", views.myRequests, name="myRequests"),
 ]
 
 if settings.DEBUG:
