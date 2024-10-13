@@ -26,6 +26,17 @@ class RegistroForm(UserCreationForm):
         if commit:
             user.save()
         return user
+
+class EditProfileForm(forms.ModelForm):
+    class Meta:
+        model = Usuario  
+        fields = ['first_name', 'email', 'telefono', 'direccion', 'foto']
+        
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if Usuario.objects.filter(email=email).exists() and self.instance.email != email:
+            raise forms.ValidationError("El correo electrónico ya está en uso.")
+        return email
     
 class MascotaForm(forms.ModelForm):
     class Meta:

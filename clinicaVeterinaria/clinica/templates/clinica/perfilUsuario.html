@@ -40,40 +40,37 @@
 
             <div class="tab-content mt-3" id="perfilTabsContent">
 
-                <!-- Pestaña de Datos Personales -->
                 <div class="tab-pane fade show active" id="datos-personales" role="tabpanel" aria-labelledby="datos-personales-tab">
                     <div class="row justify-content-center">
                         <div class="col-md-6">
                             <!-- Imagen de perfil -->
-                            <img src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png" 
+                            <img src="../media/{{ usuario.foto }}" 
                                 alt="Imagenperfil" 
                                 style="display: block; margin: 0 auto 15px auto; width: 130px; height: 130px; border-radius: 50%; object-fit: cover; border: 3px;">
 
+                            <form action="{% url 'editProfile' %}" enctype="multipart/form-data" method="POST">
+                                {% csrf_token %}
+
                                 <div class="form-group" style="margin-bottom: 10px;">
                                     <label for="profile-image" class="form-label">Foto de perfil</label>
-                                    <input type="file" class="form-control" id="Imagenperfil">
+                                    <input type="file" class="form-control" id="foto" name="foto">
                                 </div>
 
-                            <form action="{% url 'editProfile' %}" enctype="multipart/form-data" method="POST">
-                                <!-- Nombre -->
                                 <div class="form-group" style="margin-bottom: 25px;">
                                     <label for="nombre">Nombre:</label>
                                     <input type="text" class="form-control" id="nombre" name="first_name" value="{{ usuario.first_name }}" required>
                                 </div>
 
-                                <!-- Correo Electrónico -->
                                 <div class="form-group" style="margin-bottom: 20px;">
                                     <label for="email">Correo Electrónico:</label>
                                     <input type="email" class="form-control" id="email" name="email" value="{{ usuario.email }}" required>
                                 </div>
 
-                                <!-- Teléfono -->
                                 <div class="form-group" style="margin-bottom: 20px;">
                                     <label for="telefono">Teléfono:</label>
                                     <input type="tel" class="form-control" id="telefono" name="telefono" value="{{ usuario.telefono }}" required>
                                 </div>
 
-                                <!-- Dirección -->
                                 <div class="form-group" style="margin-bottom: 20px;">
                                     <label for="direccion">Dirección:</label>
                                     <input type="text" class="form-control" id="direccion" name="direccion" value="{{ usuario.direccion }}" required>

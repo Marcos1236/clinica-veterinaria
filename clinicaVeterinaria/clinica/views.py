@@ -232,18 +232,16 @@ def profile(request):
 @login_required
 def editProfile(request):
     if request.method == 'POST':
-        usuario = request.user
+        form = EditProfileForm(request.POST, request.FILES, instance=request.user)
+        
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Tu perfil ha sido actualizado correctamente.")
+            return redirect('profile')
+        else:
+            messages.error(request, "Por favor corrige los errores en el formulario.")
 
-        usuario.first_name = request.POST.get('first_name')
-        usuario.email = request.POST.get('email')
-        usuario.telefono = request.POST.get('telefono')
-        usuario.direccion = request.POST.get('direccion')
-
-        usuario.save()
-
-        messages.success(request, "Tu perfil ha sido actualizado correctamente.")
-
-        return redirect('perfil')  
+        return redirect('profile')  
 
     return render(request, 'clinica/perfilUsuario.html', {'usuario': request.user})
 

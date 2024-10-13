@@ -11,6 +11,7 @@ class Usuario(AbstractUser):
     pais = models.CharField(max_length=50)
     codigo_postal = models.CharField(max_length=10)
     password = models.CharField(max_length=100)
+    foto = models.ImageField(upload_to='usuarios_fotos/', blank=True, default="../static/images/defaultPFP.jpg")
 
     def __str__(self):
         return self.first_name

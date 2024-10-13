@@ -21,9 +21,16 @@
       <!-- Navbar -->
       <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
         <div class="container">
-          <a class="navbar-brand" href="{% url 'calendar' %}">
-            Clínica
-          </a>
+          <div class="dropdown show">
+            <a class="navbar-brand dropdown-toggle" href="#" role="button" id="clinicaVet" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Clinica
+            </a>
+          
+            <div class="dropdown-menu" aria-labelledby="clinicaVet">
+              <a class="dropdown-item" href="{% url 'logout' %}">Cerrar sesión</a>
+            </div>
+          </div>
+          
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="">
             <span class="navbar-toggler-icon"></span>
           </button>
