@@ -139,12 +139,17 @@ def calendar(request):
             'form': form,
             'mascotas': mascotas,
             'vets': vets,
+            'user' : request.user,
         }
         return render(request, 'clinica/calendario_cliente.html', context)
 
     elif Veterinario.objects.filter(dni=request.user).exists():
         citas = Citas.objects.filter(dni=user.dni)
-        return render(request, 'clinica/calendario_veterinario.html', {'citas': citas})
+        context = {
+            'events': citas,
+            'user': request.user
+        }
+        return render(request, 'clinica/calendario_veterinario.html', context)
 
 @login_required
 def addEvent(request):

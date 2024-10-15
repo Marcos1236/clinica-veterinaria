@@ -15,9 +15,15 @@
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script id="calendar-events" type="application/json">
+        {{ events|safe }}
+    </script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             var calendarEl = document.getElementById('calendar');
+            var events = document.getElementById('calendar-events').textContent;
             var calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
                 themeSystem: 'bootstrap5',
@@ -28,7 +34,7 @@
                     center: 'title',
                     right: 'dayGridMonth,timeGridWeek,timeGridDay'
                 },
-                events: '', // Aquí poner endpoint desde el cuál se obtendrán las citas de la base de datos
+                events: events, // Aquí poner endpoint desde el cuál se obtendrán las citas de la base de datos
 
                 eventClick: function(info) {
                     // Mostrar la información de la cita en el modal
@@ -149,31 +155,101 @@
             <div class="row">
                 <div class="col-md-3">
                     <div class="mt-5">
-                        <div class="mt-4 d-none d-md-block">
-                            <a class="btn btn-primary mt-3 w-100" data-toggle="collapse" href="#chatClient" role="button" aria-expanded="false" aria-controls="chatClient">
-                                Chat con Cliente <i class="bi bi-chevron-down"></i>
-                            </a>
+                        <a class="btn btn-primary mt-3 w-100" data-toggle="collapse" href="#chatClient" role="button" aria-expanded="false" aria-controls="chatClient">
+                            Chat con Clientes <i class="bi bi-chevron-down"></i>
+                        </a>
+                        
     
-                            <div id="chatClient" class="collapse mt-2 border mt-2 p-2" style="max-height: 400px; overflow-y: auto;">
-                                <div class="mb-2"><strong>Chats Disponibles:</strong></div>
-                                <ul class="list-group">
-                                    <li class="list-group-item chat-option" data-chat="Cliente 1">Cliente 1</li>
-                                    <li class="list-group-item chat-option" data-chat="Cliente 2">Cliente 2</li>
-                                </ul>
+                        <div id="chatClient" class="collapse mt-2 border mt-2 p-2" style="max-height: 400px; overflow-y: auto;">
     
-                                <div>
-                                    <h6 id="currentChat">Selecciona un chat</h6>
-                                    <div id="chatContainer" class="border p-3 mb-2" style="height: 200px; overflow-y: auto;"></div>
-                                    <div class="input-group mt-2">
+                            <div class="mb-2"><strong>Chats Disponibles:</strong></div>
+    
+                            
+    
+                            <ul class="list-group" id="vetList">
+                                <!-- Aqui se añadiran los chats -->
+                            </ul>
+    
+                            <!-- Modal del chat -->
+                            <div class="modal fade" id="chatModal" tabindex="-1" aria-labelledby="chatModalLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="chatModalLabel">Chat</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <!-- Aquí va el contenido del chat -->
+                                        <h6 id="currentChat">Selecciona un chat</h6>
+                                        <div id="chatContainer" class="border p-3 mb-2" style="height: 200px; overflow-y: auto;"></div>
+                                        <div class="input-group mt-2">
                                         <input type="text" id="chatInput" class="form-control" placeholder="Escribe tu mensaje..." aria-label="Mensaje">
                                         <button class="btn btn-primary" id="sendMessageButton">Enviar</button>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                                    </div>
                                     </div>
                                 </div>
                             </div>
-                            
+    
                         </div>
+    
                     </div>
                 </div>
+                
+                <script>
+                    let chatSocket = new WebSocket('ws://localhost:8001/ws/chat/' + '{{ user.dni }}' + '/');
+                
+                    chatSocket.onmessage = function(e) {
+                        const data = JSON.parse(e.data);
+
+                        if (data.type === 'new_chat') {
+                            const clientName = data.client_name;
+                            const chatId = data.client_id;
+
+                            if (!document.querySelector(`[data-chat="${chatId}"]`)) {
+  
+                                $('#vetList').append(`
+                                    <li class="list-group-item chat-option" data-chat="${chatId}" data-bs-toggle="modal" data-bs-target="#chatModal">
+                                        ${clientName}
+                                    </li>
+                                `);
+                                console.log(`New client added: ${clientName} (ID: ${chatId})`);
+                            } else {
+                                console.log(`Client already exists: ${clientName} (ID: ${chatId})`);
+                            }
+                        } else {
+                            // Mostrar el mensaje recibido en el chat
+                            document.getElementById('chatContainer').innerHTML += `<div><strong>${data.sender}:</strong> ${data.message}</div>`;
+                        }
+                    };
+                
+                    chatSocket.onclose = function(e) {
+                        console.error('Chat cerrado.');
+                    };
+                
+                    document.getElementById('sendMessageButton').onclick = function(e) {
+                        const message = document.getElementById('chatInput').value;
+                        if (chatSocket && message) {
+                            chatSocket.send(JSON.stringify({
+                                'message': message,
+                                'sender': '{{ user.first_name }} {{ user.last_name }}',
+                                'recipient': '{{ user.dni }}'
+                            }));
+                            document.getElementById('chatInput').value = '';
+                        }
+                    };
+
+                    $('#chatModal').on('hidden.bs.modal', function () {
+                        if (chatSocket) {
+                            chatSocket.close();
+                            chatSocket = null; 
+                        }
+                    });
+                </script>
+                
 
                 <div class="col-md-9">
                     <div id="calendar" class="mt-3"></div>
