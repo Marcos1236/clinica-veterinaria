@@ -16,8 +16,10 @@ import string
 import json
 import traceback
 
-# Create your views here.
+
 def index(request):
+    if request.user.is_authenticated:
+        return redirect('calendar')
     return render(request, "clinica/pantallaCarga.html")
 
 @staff_member_required
@@ -39,6 +41,9 @@ def generateCode(request):
     return render(request, 'clinica/generateCode.html', {'form': form, 'codigos': codigos})
 
 def registerClient(request):
+    if request.user.is_authenticated:
+        return redirect('calendar')
+    
     if request.method == 'POST':
         form = RegistroForm(request.POST)
         if form.is_valid():
@@ -55,6 +60,9 @@ def registerClient(request):
     return render(request, 'clinica/registroCliente.html', {'form': form})
 
 def registerVet(request):
+    if request.user.is_authenticated:
+        return redirect('calendar')
+    
     if request.method == 'POST':
         form = RegistroForm(request.POST)
         codigo_ingresado = request.POST.get('codigo_registro')
@@ -85,6 +93,9 @@ def registerVet(request):
     return render(request, 'clinica/registroVeterinario.html', {'form': form})
 
 def login(request):
+    if request.user.is_authenticated:
+        return redirect('calendar')
+     
     if request.method == 'POST':
         username = request.POST.get('username')  
         password = request.POST.get('password')
@@ -110,6 +121,7 @@ def calendar(request):
     if Cliente.objects.filter(dni=request.user).exists():
         mascotas = Mascota.objects.filter(dni=user.dni)
         citas = Citas.objects.filter(idM__in=mascotas)
+        vets = Veterinario.objects.all()
 
         if request.method == 'POST':
             mascota = request.POST.get('mascota')
@@ -118,14 +130,7 @@ def calendar(request):
                 citas = Citas.objects.filter(idM__in=mascotas) 
             elif mascota:
                 citas = Citas.objects.filter(idM_id=mascota)
-            else:
-                form = CitaForm(request.POST)
-                if form.is_valid():
-                    cita = form.save(commit=False)
-                    cita.tipo = 'U' if 'tipo' in request.POST else 'R'
-                    cita.save()
-                    return redirect('calendar') 
-        
+
         form = CitaForm()
         events = generate_events(citas)
 
@@ -133,12 +138,62 @@ def calendar(request):
             'events': json.dumps(events),
             'form': form,
             'mascotas': mascotas,
+            'vets': vets,
         }
         return render(request, 'clinica/calendario_cliente.html', context)
 
     elif Veterinario.objects.filter(dni=request.user).exists():
         citas = Citas.objects.filter(dni=user.dni)
         return render(request, 'clinica/calendario_veterinario.html', {'citas': citas})
+
+@login_required
+def addEvent(request):
+    if request.method == 'POST':
+
+        form = CitaForm(request.POST)
+        if form.is_valid():
+            cita = form.save(commit=False)
+            cita.tipo = 'U' if 'tipo' in request.POST else 'R'
+            cita.save()
+            messages.success(request, 'La cita ha sido creada correctamente.')
+        else:
+            for field in form:
+                for error in field.errors:
+                    messages.error(request, f"Error en {field.label}: {error}")
+        return redirect('calendar') 
+
+@login_required
+def editEvent(request):
+    if request.method == 'POST':
+        
+        try:
+            cita = Citas.objects.get(id=request.POST.get('cita_id'))  # Cambia 'Cita' por el nombre real de tu modelo
+        except Citas.DoesNotExist:
+            messages.error(request, 'La cita no existe.')
+            return redirect('calendar')
+        
+        form = EditCitaForm(request.POST, request.FILES, instance=cita)
+        if form.is_valid():
+            cita = form.save(commit=False)
+            cita.save()
+            messages.info(request, 'La cita ha sido modificada.')
+        else:
+            for field in form:
+                for error in field.errors:
+                    messages.error(request, f"Error en {field.label}: {error}")
+        return redirect('calendar') 
+@login_required
+def deleteEvent(request):
+    id = request.POST.get('cita_id')
+    ids_mascotas = request.user.cliente.mascota_set.values_list('id', flat=True)
+
+    event = get_object_or_404(Citas, id=id, idM_id__in=ids_mascotas)
+    
+    if request.method == 'POST':  
+        event.delete()
+        return redirect('calendar')  
+    else:
+        messages.error(request, 'No se puede eliminar la mascota de esta forma.')
 
 def generate_events(citas):
     """Genera eventos para el calendario a partir de las citas."""
@@ -160,23 +215,24 @@ def generate_events(citas):
             },
         })
     return events
-  
 
-@login_required
-def deleteEvent(request):
-    id = request.POST.get('cita_id')
-    ids_mascotas = request.user.cliente.mascota_set.values_list('id', flat=True)
-
-    event = get_object_or_404(Citas, id=id, idM_id__in=ids_mascotas)
-    
-    if request.method == 'POST':  
-        event.delete()
-        return redirect('calendar')  
-    else:
-        messages.error(request, 'No se puede eliminar la mascota de esta forma.')
 
 @login_required
 def myPets(request):
+    if Cliente.objects.filter(dni=request.user).exists():
+        try:
+            client = Cliente.objects.get(dni=request.user)
+
+            pets = Mascota.objects.filter(dni=client)
+
+            return render(request, 'clinica/mascotas.html', {'pets': pets})
+        except Cliente.DoesNotExist:
+            return HttpResponseForbidden("No tienes permiso para acceder a esta página.")
+    else:
+        return HttpResponseForbidden("No tienes permiso para acceder a esta página.")
+
+@login_required
+def addPet(request):
     if request.method == 'POST':
         form = MascotaForm(request.POST, request.FILES)
         
@@ -189,23 +245,12 @@ def myPets(request):
             mascota.dni = cliente
             mascota.idH = historial_medico
             mascota.save()
-
-            return redirect('myPets')
+            messages.success(request, 'La mascota ha sido creada correctamente.')
         else:
-            return render(request, 'clinica/mascotas.html', {'form': form})
-
-    elif request.method == 'GET':
-        if Cliente.objects.filter(dni=request.user).exists():
-            try:
-                client = Cliente.objects.get(dni=request.user)
-
-                pets = Mascota.objects.filter(dni=client)
-
-                return render(request, 'clinica/mascotas.html', {'pets': pets})
-            except Cliente.DoesNotExist:
-                return HttpResponseForbidden("No tienes permiso para acceder a esta página.")
-        else:
-            return HttpResponseForbidden("No tienes permiso para acceder a esta página.")
+            for field in form:
+                for error in field.errors:
+                    messages.error(request, f"Error en {field.label}: {error}")
+        return redirect('myPets')
 
 @login_required
 def deletePet(request, id):
@@ -216,7 +261,7 @@ def deletePet(request, id):
         messages.success(request, 'La mascota ha sido eliminada correctamente.')
         return redirect('myPets')  
     else:
-        messages.error(request, 'No se puede eliminar la mascota de esta forma.')
+        messages.error(request, 'No se ha podido eliminar la mascota')
 
 @login_required
 def profile(request):
@@ -239,7 +284,9 @@ def editProfile(request):
             messages.success(request, "Tu perfil ha sido actualizado correctamente.")
             return redirect('profile')
         else:
-            messages.error(request, "Por favor corrige los errores en el formulario.")
+            for field in form:
+                for error in field.errors:
+                    messages.error(request, f"Error en {field.label}: {error}")
 
         return redirect('profile')  
 

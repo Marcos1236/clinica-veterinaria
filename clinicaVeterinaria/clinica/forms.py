@@ -66,4 +66,18 @@ class CitaForm(forms.ModelForm):
             raise forms.ValidationError("La fecha de la cita no puede ser anterior a la fecha actual.")
         
         return fecha
+
+class EditCitaForm(forms.ModelForm):
+
+    class Meta:
+        model = Citas
+        fields = ['fecha', 'hora']
+    
+    def clean_fecha(self):
+        fecha = self.cleaned_data.get('fecha')
+
+        if fecha.date() < timezone.now().date():
+            raise forms.ValidationError("La fecha de la cita no puede ser anterior a la fecha actual.")
+        
+        return fecha
     
