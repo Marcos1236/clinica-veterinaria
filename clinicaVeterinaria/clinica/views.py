@@ -161,8 +161,10 @@ def calendar(request):
 
     elif Veterinario.objects.filter(dni=request.user).exists():
         citas = Citas.objects.filter(dni=user.dni)
+        events = generate_events(citas)
+
         context = {
-            'events': citas,
+            'events': json.dumps(events),
             'user': request.user
         }
         return render(request, 'clinica/calendario_veterinario.html', context)
@@ -318,12 +320,12 @@ def editProfile(request):
 def myAppointments(request):
     layout = ""
     user = request.user
+    citas_usuario = []
 
     if Cliente.objects.filter(dni=user.dni).exists():
         layout = "clinica/layout_cliente.html"
 
         mascotas = Mascota.objects.filter(dni=user.dni)
-        citas_usuario = []
 
         for mascota in mascotas:
             citas = Citas.objects.filter(idM=mascota).order_by('fecha', 'hora')
@@ -338,6 +340,17 @@ def myAppointments(request):
                     "tipo": cita.tipo
                 })
     elif Veterinario.objects.filter(dni=user.dni).exists():
+        citas = Citas.objects.filter(dni=user.dni).order_by('fecha', 'hora')
+        for cita in citas:
+            citas_usuario.append({
+                "citas_id": cita.id,
+                "nombre": cita.nombre,
+                "fecha": cita.fecha,
+                "hora": cita.hora,
+                "motivo": cita.motivo,
+                "aceptada": cita.aceptada,
+                "tipo": cita.tipo
+            })
         layout = "clinica/layout_veterinario.html"
 
     fecha_actual = timezone.now()
@@ -345,18 +358,16 @@ def myAppointments(request):
     citas_pendientes = [cita for cita in citas_usuario if cita["fecha"] >= fecha_actual]
     citas_historial = [cita for cita in citas_usuario if cita["fecha"] < fecha_actual]
 
-    paginator_pendientes = Paginator(citas_pendientes, 5) 
+    paginator_pendientes = Paginator(citas_pendientes, 4) 
     page_number_pendientes = request.GET.get('pendientes_page')
     page_obj_pendientes = paginator_pendientes.get_page(page_number_pendientes)
 
 
-    paginator_historial = Paginator(citas_historial, 5) 
+    paginator_historial = Paginator(citas_historial, 4) 
     page_number_historial = request.GET.get('historial_page')
     page_obj_historial = paginator_historial.get_page(page_number_historial)
 
     context = {
-        'citas_pendientes': citas_pendientes,
-        'citas_historial': citas_historial,
         'layout': layout,
         'page_obj_pendientes': page_obj_pendientes,
         'page_obj_historial': page_obj_historial,
@@ -366,4 +377,33 @@ def myAppointments(request):
 
 @login_required
 def myRequests(request):
-    return render(request, 'clinica/solicitudes.html') 
+    if Veterinario.objects.filter(dni=request.user).exists():
+        fecha_actual = timezone.now()
+        solicitudes = Citas.objects.filter(fecha__gt=fecha_actual,aceptada=0).order_by('fecha', 'hora')  
+        
+        paginator = Paginator(solicitudes, 3)  
+        page_number = request.GET.get('page')  
+        page_obj = paginator.get_page(page_number)
+
+        context = {
+            'page_obj': page_obj,
+        }
+
+        return render(request, 'clinica/solicitudes.html', context)
+    else:
+        messages.error(request, 'No tienes permiso para acceder a esta página.')
+        return redirect('calendar')
+    
+@login_required
+def acceptRequest(request, id):
+    if not Veterinario.objects.filter(dni=request.user).exists():
+        messages.error(request, 'No tienes permiso para aceptar citas.')
+        return redirect('calendar') 
+
+    cita = get_object_or_404(Citas, id=id)
+    cita.aceptada = True
+    cita.dni_id = request.user.dni
+    cita.save()
+
+    messages.success(request, 'Cita aceptada exitosamente.')
+    return redirect('myRequests') 

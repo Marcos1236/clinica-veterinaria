@@ -22,6 +22,7 @@ urlpatterns = [
     path("editProfile/", views.editProfile, name="editProfile"),
     path("myAppointments/", views.myAppointments, name="myAppointments"),
     path("myRequests/", views.myRequests, name="myRequests"),
+    path("acceptRequest/<int:id>/", views.acceptRequest, name="acceptRequest"),
 ]
 
 if settings.DEBUG:
