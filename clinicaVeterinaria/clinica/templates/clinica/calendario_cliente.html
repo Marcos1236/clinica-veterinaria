@@ -1,257 +1,226 @@
 {% extends 'layout_cliente.html' %}
 {% block content %}
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calendario de Citas</title>
-    
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://bootswatch.com/5/pulse/bootstrap.min.css" rel="stylesheet"> 
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.0/font/bootstrap-icons.min.css" rel="stylesheet">
+<script id="calendar-events" type="application/json">
+    {{ events|safe }}
+</script>
 
-    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('calendar');
+        var events = JSON.parse(document.getElementById('calendar-events').textContent);
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            themeSystem: 'bootstrap5',
+            locale: 'es',
+            navLinks: true,
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay'
+            },
+            events: events,
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+            eventClick: function(info) {
+                event = info.event;
 
-    <script id="calendar-events" type="application/json">
-        {{ events|safe }}
-    </script>
-    
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            var calendarEl = document.getElementById('calendar');
-            var events = JSON.parse(document.getElementById('calendar-events').textContent);
-            var calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'dayGridMonth',
-                themeSystem: 'bootstrap5',
-                locale: 'es',
-                navLinks: true,
-                headerToolbar: {
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
-                },
-                events: events,
+                document.getElementById('eliminarCitaInput').value = event.id;
+                document.getElementById('eventPet').innerText = event.extendedProps.extraParams.mascota;
+                document.getElementById('eventTitle').innerText = event.title;
+                document.getElementById('eventDescription').innerText = event.extendedProps.description;
+                document.getElementById('eventStart').innerText = new Date(event.start).toLocaleString();
+                document.getElementById('eventEnd').innerText = new Date(event.end).toLocaleString();
+                document.getElementById('eventAccepted').innerText = event.extendedProps.extraParams.accepted ? 'Aceptada' : 'Pendiente';
 
-                eventClick: function(info) {
-                    event = info.event;
+                var type = event.extendedProps.extraParams.type;
+                document.getElementById('eventType').innerText = (type === 'U') ? 'Urgente' : (type === 'R') ? 'Rutinaria' : 'No especificado';
 
-                    document.getElementById('eventPet').innerText = event.extendedProps.extraParams.mascota;
-                    document.getElementById('eventTitle').innerText = event.title;
-                    document.getElementById('eventDescription').innerText = event.extendedProps.description;
-                    document.getElementById('eventStart').innerText = new Date(event.start).toLocaleString();
-                    document.getElementById('eventEnd').innerText = new Date(event.end).toLocaleString();
-                    document.getElementById('eventAccepted').innerText = event.extendedProps.extraParams.accepted ? 'Aceptada' : 'Pendiente';
-
-                    var type = event.extendedProps.extraParams.type;
-                    document.getElementById('eventType').innerText = (type === 'U') ? 'Urgente' : (type === 'R') ? 'Rutinaria' : 'No especificado';
-
-                    var eventModal = new bootstrap.Modal(document.getElementById('eventInfoModal'));
-                    eventModal.show();
-                }
-            });
-            calendar.render();
-
-            // Manejo de cambios en los checkboxes
-            $('input[type="checkbox"]').on('change', function() {
-                filterEvents();
-            });
-        });
-
-        function filterEvents() {
-            const selectedFilters = [];
-            $('input[type="checkbox"]:checked').each(function() {
-                selectedFilters.push($(this).val());
-            });
-        }
-
-        function openInfo() {
-            var modal = new bootstrap.Modal(document.getElementById('informacion'));
-            modal.show();
-        }
-
-        const events = JSON.parse('{{ events|escapejs }}');
-
-        function llenarSelectCitas(selectId) {
-            const citaSelect = document.getElementById(selectId);
-
-            if (citaSelect.options.length > 1) {
-                return;
+                var eventModal = new bootstrap.Modal(document.getElementById('eventInfoModal'));
+                eventModal.show();
             }
+        });
+        calendar.render();
 
-            events.forEach(event => {
-                const option = document.createElement('option');
-                option.value = event.id;
+        // Manejo de cambios en los checkboxes
+        $('input[type="checkbox"]').on('change', function() {
+            filterEvents();
+        });
+    });
 
-                const nombreCompleto = event.title || 'Sin nombre';
-                const nombre = nombreCompleto.includes('Cita: ') ? nombreCompleto.split('Cita: ')[1].trim() : nombreCompleto;
+    function filterEvents() {
+        const selectedFilters = [];
+        $('input[type="checkbox"]:checked').each(function() {
+            selectedFilters.push($(this).val());
+        });
+    }
 
-                const nombreMascota = event.extraParams.mascota || 'Sin mascota';
-                const fecha = new Date(event.start).toLocaleDateString(); 
-                const hora = new Date(event.start).toLocaleTimeString(); 
+    function openInfo() {
+        var modal = new bootstrap.Modal(document.getElementById('informacion'));
+        modal.show();
+    }
 
-                option.textContent = `${nombre} - ${nombreMascota} - ${fecha} - ${hora}`;
-                citaSelect.appendChild(option);
-            });
-        }
-    </script>
+    const events = JSON.parse('{{ events|escapejs }}');
 
-    <style>
-        /* Cambiar color de los días */
-        .fc-col-header-cell-cushion {
-            color: #8e24ff; /* Cambiar al color que prefieras */
-        }
+    function llenarSelectCitas(selectId) {
+        const citaSelect = document.getElementById(selectId);
 
-        .fc-daygrid-day-number {
-            color: #8e24ff; /* Color del número de los días */
-        }
-
-        .fc-day-sun, .fc-day-sat {
-            color: #8e24ff; /* Color de los fines de semana */
+        if (citaSelect.options.length > 1) {
+            return;
         }
 
-        .fc-toolbar button {
-            background-color: #593196 !important; /* Fondo morado */
-            border-color: #593196 !important; /* Borde morado */
-            color: #ffffff !important; /* Texto blanco */
+        events.forEach(event => {
+            const option = document.createElement('option');
+            option.value = event.id;
+
+            const nombreCompleto = event.title || 'Sin nombre';
+            const nombre = nombreCompleto.includes('Cita: ') ? nombreCompleto.split('Cita: ')[1].trim() : nombreCompleto;
+
+            const nombreMascota = event.extraParams.mascota || 'Sin mascota';
+            const fecha = new Date(event.start).toLocaleDateString(); 
+            const hora = new Date(event.start).toLocaleTimeString(); 
+
+            option.textContent = `${nombre} - ${nombreMascota} - ${fecha} - ${hora}`;
+            citaSelect.appendChild(option);
+        });
+    }
+
+    const vets = JSON.parse('{{ vets|escapejs }}');
+
+    function llenarVetsDisponibles() {
+        listaVeterinarios = document.getElementById('vetList');
+
+        if (listaVeterinarios.childElementCount >= 1) {
+            return;
         }
 
-        .fc-toolbar button:hover {
-            background-color: #41246e !important; /* Fondo más oscuro al pasar el ratón */
-            border-color: #41246e !important; /* Borde más oscuro */
-        }
+        vets.forEach(vet => {
+            let socket = new WebSocket('ws://localhost:8001/ws/chat/' + vet.dni_id + '/');
 
-        .fc-toolbar button:focus {
-            box-shadow: none !important; /* Eliminar el efecto de foco */
-        }
+            socket.onopen = function() {
+                try {
+                    socket.send(JSON.stringify({
+                        'message': "check_connection",
+                        'sender': '{{ user.first_name }} {{ user.last_name }}',
+                        'recipient': vet.dni_id
+                    }));
+                } catch (error) {
+                    console.log("Error al enviar el mensaje:", error);
+                }
+            };
 
-        /* Estilo para las opciones de chat */
-        .chat-option {
-            color: #000000 !important;
-            background-color: #f8f9fa !important; /* Fondo claro */
-            border: 1px solid #dee2e6; /* Borde para separarlas */
-            padding: 10px;
-            margin-bottom: 5px;
-            cursor: pointer; /* Cambia el cursor a una mano de selección */
-        }
+            socket.onmessage = function(e) {
+                const data = JSON.parse(e.data);
 
-        .chat-option:hover {
-            color: #000000;
-            background-color: #e9ecef; /* Cambia de color al pasar el mouse */
-        }
-    </style>
-</head>
-<body>
-    {% if messages %}
-        <div class="alert alert-dismissible">
-            {% for message in messages %}
-                <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %}" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            {% endfor %}
-        </div>
-    {% endif %}
+                if (data.type == 'check_connection') { 
+                    if(data.success == true) {
+                        listaVeterinarios.insertAdjacentHTML('beforeend',`
+                        <li class="list-group-item chat-option" data-chat="${vet.dni_id}" data-bs-toggle="modal" data-bs-target="#chatModal">
+                            ${vet.first_name} ${vet.last_name}
+                        </li>
+                    `);
+                    } else {
+                        console.log("No se pudo conectar")
+                    }    
+                }
+            };
 
-    <div class="modal fade" id="crearCitaModal" tabindex="-1" aria-labelledby="crearCitaModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="crearCitaModalLabel">Crear Cita</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-    
-                <div class="modal-body">
-                    <form id="crearCitaForm" action="{% url 'addEvent' %}" method="POST">
-                        {% csrf_token %}
+            socket.onerror = function(error) {
+                console.error("Error en WebSocket:", error);
+            };
+            
+        });
+    }
+</script>
 
-                        <div class="mb-3">
-                            <label for="nombreCitaCrear" class="form-label">Nombre de la Cita</label>
-                            <input type="text" class="form-control" id="nombre" name="nombre" required>
-                        </div>
-    
-                        <div class="mb-3" id="elegirMascota">
-                            <label for="mascota" class="form-label">Seleccionar Mascota</label>
-                            <select class="form-select" id="mascota" aria-label="Seleccionar Mascota" name="idM">
-                                <option value="">Seleccione una mascota</option>
-                                {% for mascota in mascotas %}
-                                    <option value="{{ mascota.id }}">{{ mascota.nombre }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-    
-                        <div class="mb-3">
-                            <label for="fechaCitaCrear" class="form-label">Fecha</label>
-                            <input type="date" class="form-control" id="fecha" name="fecha" required>
-                        </div>
-    
-                        <div class="mb-3">
-                            <label for="horaCitaCrear" class="form-label">Hora</label>
-                            <select class="form-select" id="hora" name="hora" required>
-                                <option value="">Seleccione una hora</option>
-                                <option value="08:00">08:00</option>
-                                <option value="09:00">09:00</option>
-                                <option value="10:00">10:00</option>
-                                <option value="11:00">11:00</option>
-                                <option value="12:00">12:00</option>
-                                <option value="16:00">16:00</option>
-                                <option value="17:00">17:00</option>
-                                <option value="18:00">18:00</option>
-                                <option value="19:00">19:00</option>
-                            </select>
-                        </div>
-    
-                        <div class="mb-3">
-                            <label for="motivo" class="form-label">Motivo</label>
-                            <textarea class="form-control" id="motivo" rows="3" name="motivo" required></textarea>
-                        </div>
-    
-                        <div class="form-check mb-3">
-                            <input class="form-check-input" type="checkbox" id="tipo" name="tipo">
-                            <label class="form-check-label" for="tipo">
-                                Urgente
-                            </label>
-                        </div>
-    
-                        <button type="submit" class="btn btn-primary">Crear</button>
-                    </form>
-                </div>
+<style>
+    /* Cambiar color de los días */
+    .fc-col-header-cell-cushion {
+        color: #8e24ff; /* Cambiar al color que prefieras */
+    }
+
+    .fc-daygrid-day-number {
+        color: #8e24ff; /* Color del número de los días */
+    }
+
+    .fc-day-sun, .fc-day-sat {
+        color: #8e24ff; /* Color de los fines de semana */
+    }
+
+    .fc-toolbar button {
+        background-color: #593196 !important; /* Fondo morado */
+        border-color: #593196 !important; /* Borde morado */
+        color: #ffffff !important; /* Texto blanco */
+    }
+
+    .fc-toolbar button:hover {
+        background-color: #41246e !important; /* Fondo más oscuro al pasar el ratón */
+        border-color: #41246e !important; /* Borde más oscuro */
+    }
+
+    .fc-toolbar button:focus {
+        box-shadow: none !important; /* Eliminar el efecto de foco */
+    }
+
+    /* Estilo para las opciones de chat */
+    .chat-option {
+        color: #000000 !important;
+        background-color: #f8f9fa !important; /* Fondo claro */
+        border: 1px solid #dee2e6; /* Borde para separarlas */
+        padding: 10px;
+        margin-bottom: 5px;
+        cursor: pointer; /* Cambia el cursor a una mano de selección */
+    }
+
+    .chat-option:hover {
+        color: #000000;
+        background-color: #e9ecef; /* Cambia de color al pasar el mouse */
+    }
+</style>
+{% if messages %}
+    <div class="alert alert-dismissible">
+        {% for message in messages %}
+            <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %}" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-        </div>
+        {% endfor %}
     </div>
-    
+{% endif %}
 
-    <!-- Modal Modificar Cita -->
-    <div class="modal fade" id="modificarCitaModal" tabindex="-1" aria-labelledby="modificarCitaModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modificarCitaModalLabel">Modificar Cita</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
+<div class="modal fade" id="crearCitaModal" tabindex="-1" aria-labelledby="crearCitaModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="crearCitaModalLabel">Crear Cita</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
 
-                <div class="modal-body">
-                    <form id="modificarCitaForm" action="{% url 'editEvent' %}" method="POST">
-                        {% csrf_token %}
-                        <div class="mb-3">
-                            <label for="citaModificar" class="form-label">Seleccionar Cita a Modificar</label>
-                            <select class="form-select" id="citaModificar" name="cita_id" required>
-                                <option value="">Seleccione una cita</option>
-                            </select>
-                        </div>
+            <div class="modal-body">
+                <form id="crearCitaForm" action="{% url 'addEvent' %}" method="POST">
+                    {% csrf_token %}
 
-                        <div class="mb-3">
-                            <label for="nuevaFechaCita" class="form-label">Nueva Fecha</label>
-                            <input type="date" class="form-control" id="fecha" name="fecha" required>
-                        </div>
+                    <div class="mb-3">
+                        <label for="nombreCitaCrear" class="form-label">Nombre de la Cita</label>
+                        <input type="text" class="form-control" id="nombre" name="nombre" required>
+                    </div>
 
-                        <div class="mb-3">
-                            <label for="horaCitaCrear" class="form-label">Hora</label>
-                            <select class="form-select" id="hora" name="hora" required>
+                    <div class="mb-3" id="elegirMascota">
+                        <label for="mascota" class="form-label">Seleccionar Mascota</label>
+                        <select class="form-select" id="mascota" aria-label="Seleccionar Mascota" name="idM">
+                            <option value="">Seleccione una mascota</option>
+                            {% for mascota in mascotas %}
+                                <option value="{{ mascota.id }}">{{ mascota.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="fechaCitaCrear" class="form-label">Fecha</label>
+                        <input type="date" class="form-control" id="fecha" name="fecha" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="horaCitaCrear" class="form-label">Hora</label>
+                        <select class="form-select" id="hora" name="hora" required>
                             <option value="">Seleccione una hora</option>
                             <option value="08:00">08:00</option>
                             <option value="09:00">09:00</option>
@@ -262,219 +231,301 @@
                             <option value="17:00">17:00</option>
                             <option value="18:00">18:00</option>
                             <option value="19:00">19:00</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Modificar</button>
-                    </form>
-                </div>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="motivo" class="form-label">Motivo</label>
+                        <textarea class="form-control" id="motivo" rows="3" name="motivo" required></textarea>
+                    </div>
+
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="tipo" name="tipo">
+                        <label class="form-check-label" for="tipo">
+                            Urgente
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Crear</button>
+                </form>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Modal Eliminar Cita -->
-    <div class="modal fade" id="eliminarCitaModal" tabindex="-1" aria-labelledby="eliminarCitaModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="eliminarCitaModalLabel">Eliminar Cita</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+
+<!-- Modal Modificar Cita -->
+<div class="modal fade" id="modificarCitaModal" tabindex="-1" aria-labelledby="modificarCitaModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modificarCitaModalLabel">Modificar Cita</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <form id="modificarCitaForm" action="{% url 'editEvent' %}" method="POST">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="citaModificar" class="form-label">Seleccionar Cita a Modificar</label>
+                        <select class="form-select" id="citaModificar" name="cita_id" required>
+                            <option value="">Seleccione una cita</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="nuevaFechaCita" class="form-label">Nueva Fecha</label>
+                        <input type="date" class="form-control" id="fecha" name="fecha" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="horaCitaCrear" class="form-label">Hora</label>
+                        <select class="form-select" id="hora" name="hora" required>
+                        <option value="">Seleccione una hora</option>
+                        <option value="08:00">08:00</option>
+                        <option value="09:00">09:00</option>
+                        <option value="10:00">10:00</option>
+                        <option value="11:00">11:00</option>
+                        <option value="12:00">12:00</option>
+                        <option value="16:00">16:00</option>
+                        <option value="17:00">17:00</option>
+                        <option value="18:00">18:00</option>
+                        <option value="19:00">19:00</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Modificar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Eliminar Cita -->
+<div class="modal fade" id="eliminarCitaModal" tabindex="-1" aria-labelledby="eliminarCitaModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="eliminarCitaModalLabel">Eliminar Cita</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="eliminarCitaForm" action="{% url 'deleteEvent' %}" method="POST">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="citaEliminar" class="form-label">Seleccionar Cita a Eliminar</label>
+                        <select class="form-select" id="citaEliminar" name="cita_id" required>
+                            <option value="">Seleccione una cita</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-danger">Eliminar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="eventInfoModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="eventTitle">Título de la cita</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Macota:</strong> <span id="eventPet"></span></p>
+                <p><strong>Descripción:</strong> <span id="eventDescription"></span></p>
+                <p><strong>Inicio:</strong> <span id="eventStart"></span></p>
+                <p><strong>Fin:</strong> <span id="eventEnd"></span></p>
+                <p><strong>Estado:</strong> <span id="eventAccepted"></span></p>
+                <p><strong>Tipo de cita:</strong> <span id="eventType"></span></p>
+            </div>
+            <div class="modal-footer">
+                <form aria-hidden="true" id="eliminarCitaForm" action="{% url 'deleteEvent' %}" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" id="eliminarCitaInput" name="cita_id" required>
+                    <button type="submit" class="btn btn-danger">Eliminar</button>
+                </form>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="mt-5">
+                <a class="btn btn-primary w-100" data-bs-toggle="collapse" href="#gestionarCitas" role="button" aria-expanded="false" aria-controls="gestionarCitas">
+                    Gestión de Citas <i class="bi bi-chevron-down"></i>
+                </a>
+
+                <div class="collapse mt-2" id="gestionarCitas">
+                    <div class="d-flex flex-column">
+                        <button type="button" class="btn btn-secondary mb-2" data-bs-toggle="modal" data-bs-target="#crearCitaModal">Crear Cita</button>
+                        <button type="button" class="btn btn-secondary mb-2" data-bs-toggle="modal" data-bs-target="#modificarCitaModal" onclick="llenarSelectCitas('citaModificar')">Modificar Cita</button>
+                        <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#eliminarCitaModal" onclick="llenarSelectCitas('citaEliminar')">Eliminar Cita</button>
+                    </div>
+
                 </div>
-                <div class="modal-body">
-                    <form id="eliminarCitaForm" action="{% url 'deleteEvent' %}" method="POST">
+
+
+                <a class="btn btn-primary mt-3 w-100" data-bs-toggle="collapse" href="#filtrarMascota" role="button" aria-expanded="false" aria-controls="filtrarMascota">
+                    Filtrar por Mascota <i class="bi bi-chevron-down"></i>
+                </a>
+
+                <div class="collapse mt-2" id="filtrarMascota">
+                    <form method="POST" id="filtrarMascotaForm">
                         {% csrf_token %}
-                        <div class="mb-3">
-                            <label for="citaEliminar" class="form-label">Seleccionar Cita a Eliminar</label>
-                            <select class="form-select" id="citaEliminar" name="cita_id" required>
-                                <option value="">Seleccione una cita</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="btn btn-danger">Eliminar</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="eventInfoModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="eventTitle">Título de la cita</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p><strong>Macota:</strong> <span id="eventPet"></span></p>
-                    <p><strong>Descripción:</strong> <span id="eventDescription"></span></p>
-                    <p><strong>Inicio:</strong> <span id="eventStart"></span></p>
-                    <p><strong>Fin:</strong> <span id="eventEnd"></span></p>
-                    <p><strong>Estado:</strong> <span id="eventAccepted"></span></p>
-                    <p><strong>Tipo de cita:</strong> <span id="eventType"></span></p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="container">
-        <div class="row">
-            <div class="col-md-3">
-                <div class="mt-5">
-                    <a class="btn btn-primary w-100" data-toggle="collapse" href="#gestionarCitas" role="button" aria-expanded="false" aria-controls="gestionarCitas">
-                        Gestión de Citas <i class="bi bi-chevron-down"></i>
-                    </a>
-
-                    <div class="collapse mt-2" id="gestionarCitas">
-                        <div class="d-flex flex-column">
-                            <button type="button" class="btn btn-secondary mb-2" data-bs-toggle="modal" data-bs-target="#crearCitaModal">Crear Cita</button>
-                            <button type="button" class="btn btn-secondary mb-2" data-bs-toggle="modal" data-bs-target="#modificarCitaModal" onclick="llenarSelectCitas('citaModificar')">Modificar Cita</button>
-                            <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#eliminarCitaModal" onclick="llenarSelectCitas('citaEliminar')">Eliminar Cita</button>
-                        </div>
-
-                    </div>
-
-
-                    <a class="btn btn-primary mt-3 w-100" data-toggle="collapse" href="#filtrarMascota" role="button" aria-expanded="false" aria-controls="filtrarMascota">
-                        Filtrar por Mascota <i class="bi bi-chevron-down"></i>
-                    </a>
-
-                    <div class="collapse mt-2" id="filtrarMascota">
-                        <form method="POST" id="filtrarMascotaForm">
-                            {% csrf_token %}
-                            <select class="form-select" id="mascotaFiltro" name="mascota" aria-label="Seleccionar Mascota" onchange="document.getElementById('filtrarMascotaForm').submit();">
-                                <option value="">Seleccione una mascota</option>
-                                {% for mascota in mascotas %}
-                                    <option value="{{ mascota.id }}">{{ mascota.nombre }}</option>
-                                {% endfor %}
-                            </select>
-                            <button type="submit" name="clear_filter" class="btn btn-secondary mt-2 w-100">Quitar Filtros</button>
-                        </form>    
-                    </div>
-                            
-                    
-                    <a class="btn btn-primary mt-3 w-100" data-toggle="collapse" href="#chatVet" role="button" aria-expanded="false" aria-controls="chatVet">
-                        Chat con Veterinario <i class="bi bi-chevron-down"></i>
-                    </a>
-                    
-
-                    <div id="chatVet" class="collapse mt-2 border mt-2 p-2" style="max-height: 400px; overflow-y: auto;">
-                        <input type="text" id="searchVet" class="form-control mb-3" placeholder="Buscar Veterinario...">
-
-                        <div class="mb-2"><strong>Chats Disponibles:</strong></div>
-
-                        
-
-                        <ul class="list-group" id="vetList">
-                            {% for vet in vets %}
-                                <li class="list-group-item chat-option" data-chat="{{ vet.dni_id }}" data-bs-toggle="modal" data-bs-target="#chatModal">
-                                    {{ vet.dni.first_name }} {{ vet.dni.last_name }}
-                                </li>
+                        <select class="form-select" id="mascotaFiltro" name="mascota" aria-label="Seleccionar Mascota" onchange="document.getElementById('filtrarMascotaForm').submit();">
+                            <option value="">Seleccione una mascota</option>
+                            {% for mascota in mascotas %}
+                                <option value="{{ mascota.id }}">{{ mascota.nombre }}</option>
                             {% endfor %}
-                        </ul>
+                        </select>
+                        <button type="submit" name="clear_filter" class="btn btn-secondary mt-2 w-100">Quitar Filtros</button>
+                    </form>    
+                </div>
+                        
+                
+                <a class="btn btn-primary mt-3 w-100" data-bs-toggle="collapse" href="#chatVet" role="button" aria-expanded="false" aria-controls="chatVet" onclick="llenarVetsDisponibles(vetList);">
+                    Chat con Veterinario <i class="bi bi-chevron-down"></i>
+                </a>
+                
 
-                        <!-- Modal del chat -->
-                        <div class="modal fade" id="chatModal" tabindex="-1" aria-labelledby="chatModalLabel" aria-hidden="true">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="chatModalLabel">Chat</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <!-- Aquí va el contenido del chat -->
-                                    <h6 id="currentChat">Selecciona un chat</h6>
-                                    <div id="chatContainer" class="border p-3 mb-2" style="height: 200px; overflow-y: auto;"></div>
-                                    <div class="input-group mt-2">
-                                    <input type="text" id="chatInput" class="form-control" placeholder="Escribe tu mensaje..." aria-label="Mensaje">
-                                    <button class="btn btn-primary" id="sendMessageButton">Enviar</button>
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                                </div>
+                <div id="chatVet" class="collapse mt-2 border mt-2 p-2" style="max-height: 400px; overflow-y: auto;">
+                    <input type="text" id="searchVet" class="form-control mb-3" placeholder="Buscar Veterinario...">
+
+                    <div class="mb-2"><strong>Chats Disponibles:</strong></div>
+
+                    
+
+                    <ul class="list-group" id="vetList">
+                        <!-- Aqui irán los veterinarios disponibles -->
+                    </ul>
+
+                    <!-- Modal del chat -->
+                    <div class="modal fade" id="chatModal" tabindex="-1" aria-labelledby="chatModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="chatModalLabel">Chat</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <!-- Aquí va el contenido del chat -->
+                                <h6 id="currentChat"></h6>
+                                <div id="chatContainer" class="border p-3 mb-2" style="height: 200px; overflow-y: auto;"></div>
+                                <div class="input-group mt-2">
+                                <input type="text" id="chatInput" class="form-control" placeholder="Escribe tu mensaje..." aria-label="Mensaje">
+                                <button class="btn btn-primary" id="sendMessageButton">Enviar</button>
                                 </div>
                             </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                            </div>
+                            </div>
                         </div>
-
                     </div>
 
-                    <script>
-                        document.getElementById('searchVet').addEventListener('input', function() {
-                            const searchQuery = this.value.toLowerCase(); 
-                            const vetItems = document.querySelectorAll('#vetList .list-group-item'); 
+                </div>
 
-                            vetItems.forEach(function(vetItem) {
-                                const vetName = vetItem.textContent.toLowerCase(); 
-                                if (vetName.includes(searchQuery)) {
-                                    vetItem.style.display = ''; 
-                                } else {
-                                    vetItem.style.display = 'none'; 
-                                }
-                            });
+                <script>
+                    document.getElementById('searchVet').addEventListener('input', function() {
+                        const searchQuery = this.value.toLowerCase(); 
+                        const vetItems = document.querySelectorAll('#vetList .list-group-item'); 
+
+                        vetItems.forEach(function(vetItem) {
+                            const vetName = vetItem.textContent.toLowerCase(); 
+                            if (vetName.includes(searchQuery)) {
+                                vetItem.style.display = ''; 
+                            } else {
+                                vetItem.style.display = 'none'; 
+                            }
                         });
+                    });
 
-                        let chatSocket = null;
-                        let chatId = null;
+                    let chatSocket = null;
+                    let chatId = null;
+                    let conn = false;
 
-                        document.querySelectorAll('.chat-option').forEach((element) => {
-                            element.addEventListener('click', function() {
-                                chatId = this.dataset.chat;
+                    $('#vetList').on('click', '.chat-option', function() {
+                        const selectedChat = $(this).text(); 
+                        chatId = $(this).data('chat'); 
 
-                                if (chatSocket) {
-                                    chatSocket.close();
-                                }
+                        $('#currentChat').text('Chat con ' + selectedChat); 
+                        $('#chatContainer').empty();
+                        $('#chatInput').val(''); 
 
-                                chatSocket = new WebSocket('ws://localhost:8001/ws/chat/' + chatId + '/');
+                        if (chatSocket) {
+                            chatSocket.close();
+                        }
 
-                                chatSocket.onmessage = function(e) {
-                                    const data = JSON.parse(e.data);
-                                    console.log('Message type:', data.type);  
-                                    if(data.type != 'new_chat') {
-                                        document.getElementById('chatContainer').innerHTML += `<div><strong>${data.sender}:</strong> ${data.message}</div>`;
-                                    }
-                                    
-                                };
+                        chatSocket = new WebSocket('ws://localhost:8001/ws/chat/' + chatId + '/');
 
-                                chatSocket.onclose = function(e) {
-                                    console.error('Chat cerrado.');
-                                };
-                            });
-                        });
+                        chatSocket.onopen = function() {
+                            conn = true;
+                            chatSocket.send(JSON.stringify({
+                                'message': "new_chat",
+                                'sender': '{{ user.first_name }} {{ user.last_name }}',
+                                'recipient': chatId
+                            }));
+                        };
+                        
 
+                        chatSocket.onmessage = function(e) {
+                            const data = JSON.parse(e.data);
+                            
+                            if (data.type == 'chat_message') { 
+                                $('#chatContainer').append(`
+                                    <div><strong>${data.sender}:</strong> ${data.message}</div>
+                                `); 
+                            } else if (data.type == 'close_connection'){
+                                conn = false
+                            }
+                        };
+
+                        chatSocket.onclose = function(e) {
+                            console.error('Chat cerrado.');
+                        };
+                    });
+
+                    $(document).ready(function() {
                         $('#chatModal').on('hidden.bs.modal', function () {
                             if (chatSocket) {
                                 chatSocket.close();
                                 chatSocket = null; 
                             }
                         });
+                    });
 
-                        document.getElementById('sendMessageButton').onclick = function(e) {
-                            const message = document.getElementById('chatInput').value;
-                            if (chatSocket && message) {
-                                $('#chatContainer').scrollTop($('#chatContainer')[0].scrollHeight);
-                                document.getElementById('chatInput').value = '';
+                    document.getElementById('sendMessageButton').onclick = function(e) {
+                        const message = document.getElementById('chatInput').value;
+                        if (chatSocket && message) {
+                            if(!conn) {
                                 chatSocket.send(JSON.stringify({
-                                    'message': message,
-                                    'sender': '{{ user.first_name }} {{ user.last_name }}',
-                                    'recipient': chatId
-                                }));
+                                'message': 'new_chat',
+                                'sender': '{{ user.first_name }} {{ user.last_name }}',
+                                'recipient': chatId
+                            }));
                             }
-                            
-                        };
-                    </script>
-                </div>
-            </div>
-
-            <!-- Columna para el calendario -->
-            <div class="col-md-9">
-                <div id="calendar" class="mt-3"></div> 
+                            $('#chatContainer').scrollTop($('#chatContainer')[0].scrollHeight);
+                            document.getElementById('chatInput').value = '';
+                            chatSocket.send(JSON.stringify({
+                                'message': message,
+                                'sender': '{{ user.first_name }} {{ user.last_name }}',
+                                'recipient': chatId
+                            }));
+                        }
+                        
+                    };
+                </script>
             </div>
         </div>
-    </div>
 
-    <!-- Scripts de Bootstrap -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+        <!-- Columna para el calendario -->
+        <div class="col-md-9">
+            <div id="calendar" class="mt-3"></div> 
+        </div>
+    </div>
+</div>
 {% endblock %}

@@ -3,14 +3,17 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
+from channels.testing import WebsocketCommunicator
 from django.contrib import messages
 from django.views.generic import TemplateView
 from django.http import JsonResponse
 from .forms import *
 from .models import *
+from clinicaVeterinaria.asgi import application
 from .decorators import es_cliente, es_veterinario
 from django.http import HttpResponse, HttpResponseForbidden
 from datetime import datetime, timedelta
+from django.core.paginator import Paginator
 import random
 import string
 import json
@@ -105,7 +108,6 @@ def login(request):
             auth_login(request, usuario)  
             return redirect('calendar') 
         else:
-            print("Adios")
             messages.error(request, 'Credenciales incorrectas.')
     
     return render(request, 'clinica/login.html')
@@ -114,6 +116,7 @@ def logout(request):
     auth_logout(request)
     return redirect('login')
 
+
 @login_required
 def calendar(request):
     user = Usuario.objects.get(dni=request.user.dni)
@@ -121,7 +124,20 @@ def calendar(request):
     if Cliente.objects.filter(dni=request.user).exists():
         mascotas = Mascota.objects.filter(dni=user.dni)
         citas = Citas.objects.filter(idM__in=mascotas)
-        vets = Veterinario.objects.all()
+
+        vets = []
+        allVets = Veterinario.objects.all()
+
+        for vet in allVets:
+            user = Usuario.objects.get(dni=vet.dni_id)
+            nombre = user.first_name
+            apellidos = user.last_name
+   
+            vets.append({
+                'dni_id': vet.dni_id,
+                'first_name': nombre,  
+                'last_name': apellidos
+            })
 
         if request.method == 'POST':
             mascota = request.POST.get('mascota')
@@ -138,7 +154,7 @@ def calendar(request):
             'events': json.dumps(events),
             'form': form,
             'mascotas': mascotas,
-            'vets': vets,
+            'vets': json.dumps(vets),
             'user' : request.user,
         }
         return render(request, 'clinica/calendario_cliente.html', context)
@@ -201,24 +217,25 @@ def deleteEvent(request):
         messages.error(request, 'No se puede eliminar la mascota de esta forma.')
 
 def generate_events(citas):
-    """Genera eventos para el calendario a partir de las citas."""
     events = []
+    fecha_actual = datetime.now()
     for cita in citas:
         start_datetime = datetime.combine(cita.fecha, cita.hora)
         end_datetime = start_datetime + timedelta(hours=1)
 
-        events.append({
-            'id': cita.id,
-            'start': start_datetime.strftime("%Y-%m-%dT%H:%M:%S"),
-            'end': end_datetime.strftime("%Y-%m-%dT%H:%M:%S"),
-            'title': f'Cita: {cita.nombre}',
-            'description': cita.motivo,
-            'extraParams': {
-                'accepted': cita.aceptada,
-                'type': cita.tipo,
-                'mascota': Mascota.objects.get(id=cita.idM_id).nombre,
-            },
-        })
+        if fecha_actual < end_datetime:
+            events.append({
+                'id': cita.id,
+                'start': start_datetime.strftime("%Y-%m-%dT%H:%M:%S"),
+                'end': end_datetime.strftime("%Y-%m-%dT%H:%M:%S"),
+                'title': f'Cita: {cita.nombre}',
+                'description': cita.motivo,
+                'extraParams': {
+                    'accepted': cita.aceptada,
+                    'type': cita.tipo,
+                    'mascota': Mascota.objects.get(id=cita.idM_id).nombre,
+                },
+            })
     return events
 
 
@@ -299,12 +316,53 @@ def editProfile(request):
 
 @login_required
 def myAppointments(request):
-    layout = "" 
-    if Cliente.objects.filter(dni=request.user).exists():
+    layout = ""
+    user = request.user
+
+    if Cliente.objects.filter(dni=user.dni).exists():
         layout = "clinica/layout_cliente.html"
-    elif Veterinario.objects.filter(dni=request.user).exists():
+
+        mascotas = Mascota.objects.filter(dni=user.dni)
+        citas_usuario = []
+
+        for mascota in mascotas:
+            citas = Citas.objects.filter(idM=mascota).order_by('fecha', 'hora')
+            for cita in citas:
+                citas_usuario.append({
+                    "citas_id": cita.id,
+                    "nombre": cita.nombre,
+                    "fecha": cita.fecha,
+                    "hora": cita.hora,
+                    "motivo": cita.motivo,
+                    "aceptada": cita.aceptada,
+                    "tipo": cita.tipo
+                })
+    elif Veterinario.objects.filter(dni=user.dni).exists():
         layout = "clinica/layout_veterinario.html"
-    return render(request, 'clinica/citas.html', {'layout': layout}) 
+
+    fecha_actual = timezone.now()
+    
+    citas_pendientes = [cita for cita in citas_usuario if cita["fecha"] >= fecha_actual]
+    citas_historial = [cita for cita in citas_usuario if cita["fecha"] < fecha_actual]
+
+    paginator_pendientes = Paginator(citas_pendientes, 5) 
+    page_number_pendientes = request.GET.get('pendientes_page')
+    page_obj_pendientes = paginator_pendientes.get_page(page_number_pendientes)
+
+
+    paginator_historial = Paginator(citas_historial, 5) 
+    page_number_historial = request.GET.get('historial_page')
+    page_obj_historial = paginator_historial.get_page(page_number_historial)
+
+    context = {
+        'citas_pendientes': citas_pendientes,
+        'citas_historial': citas_historial,
+        'layout': layout,
+        'page_obj_pendientes': page_obj_pendientes,
+        'page_obj_historial': page_obj_historial,
+    }
+
+    return render(request, "citas.html", context)
 
 @login_required
 def myRequests(request):
