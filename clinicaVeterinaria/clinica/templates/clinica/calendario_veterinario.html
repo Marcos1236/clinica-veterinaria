@@ -120,7 +120,7 @@
                 <p><strong>Tipo de cita:</strong> <span id="eventType"></span></p>
             </div>
             <div class="modal-footer">
-                <form aria-hidden="true" id="eliminarCitaForm" action="{% url 'rejectEvent' %}" method="POST">
+                <form aria-hidden="true" id="eliminarCitaForm" action="{% url 'rejectRequest' %}" method="POST">
                     {% csrf_token %}
                     <input type="hidden" id="eliminarCitaInput" name="cita_id" required>
                     <button type="submit" class="btn btn-danger">Eliminar</button>

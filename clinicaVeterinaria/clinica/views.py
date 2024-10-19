@@ -55,7 +55,7 @@ def registerClient(request):
             Cliente.objects.create(dni=usuario)
 
             messages.success(request, '¡Tu cuenta ha sido creada con éxito!')
-            return redirect('login')  
+            return redirect('calendar')  
 
     else:
         form = RegistroForm()
@@ -86,7 +86,7 @@ def registerVet(request):
             codigo.save()
 
             messages.success(request, '¡Tu cuenta ha sido creada con éxito!')
-            return redirect('login')
+            return redirect('calendar')
         else:
             print("Form no válido. Errores:", form.errors)
 
@@ -379,7 +379,27 @@ def myAppointments(request):
 def myRequests(request):
     if Veterinario.objects.filter(dni=request.user).exists():
         fecha_actual = timezone.now()
-        solicitudes = Citas.objects.filter(fecha__gt=fecha_actual,aceptada=0).order_by('fecha', 'hora')  
+
+
+        citas = Citas.objects.filter(fecha__gt=fecha_actual, aceptada=False).order_by('fecha', 'hora')
+        citas_usuario = Citas.objects.filter(dni=request.user.dni, fecha__gt=fecha_actual).order_by('fecha', 'hora')
+        solicitudes = []
+
+        print(citas)
+        print(citas_usuario)
+        for cita in citas:
+            cita_start = datetime.combine(cita.fecha, cita.hora)
+
+            conflicto = False
+            for cita_usuario in citas_usuario:
+                cita_usuario_start = datetime.combine(cita_usuario.fecha, cita_usuario.hora)
+                
+                if cita_start == cita_usuario_start:
+                    conflicto = True
+                    break
+            
+            if not conflicto:
+                solicitudes.append(cita)                   
         
         paginator = Paginator(solicitudes, 3)  
         page_number = request.GET.get('page')  
@@ -407,3 +427,19 @@ def acceptRequest(request, id):
 
     messages.success(request, 'Cita aceptada exitosamente.')
     return redirect('myRequests') 
+
+def rejectRequest(request):
+    if not Veterinario.objects.filter(dni=request.user).exists():
+        messages.error(request, 'No tienes permiso para aceptar citas.')
+        return redirect('calendar') 
+    
+    id = request.POST.get('cita_id')
+    cita = get_object_or_404(Citas, id=id)
+    
+    if request.method == 'POST':  
+        cita.dni = None
+        cita.aceptada = False
+        cita.save()
+        return redirect('calendar')  
+    else:
+        messages.error(request, 'No se puede eliminar la mascota de esta forma.')

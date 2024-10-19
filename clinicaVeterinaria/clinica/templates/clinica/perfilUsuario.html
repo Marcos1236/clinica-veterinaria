@@ -41,10 +41,9 @@
         <div class="tab-pane fade show active" id="datos-personales" role="tabpanel" aria-labelledby="datos-personales-tab">
             <div class="row justify-content-center">
                 <div class="col-md-6">
-                    <!-- Imagen de perfil -->
-                    <img src="../media/{{ usuario.foto }}" 
-                        alt="Imagenperfil" 
-                        style="display: block; margin: 0 auto 15px auto; width: 130px; height: 130px; border-radius: 50%; object-fit: cover; border: 3px;">
+                    <img src="../media/{{ usuario.foto }}" alt="Imagenperfil" 
+                    style="display: block; margin: 0 auto 15px auto; width: 180px; height: 180px; border-radius: 50%; object-fit: cover; border: 3px solid #000;">
+
 
                     <form action="{% url 'editProfile' %}" enctype="multipart/form-data" method="POST">
                         {% csrf_token %}
