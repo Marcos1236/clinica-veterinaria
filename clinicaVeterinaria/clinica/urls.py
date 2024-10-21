@@ -20,6 +20,7 @@ urlpatterns = [
     path('deletePet/<int:id>/', views.deletePet, name='deletePet'),
     path("profile/", views.profile, name="profile"),
     path("editProfile/", views.editProfile, name="editProfile"),
+    path("changePassword/", views.changePassword, name="changePassword"),
     path("myAppointments/", views.myAppointments, name="myAppointments"),
     path("myRequests/", views.myRequests, name="myRequests"),
     path("acceptRequest/<int:id>/", views.acceptRequest, name="acceptRequest"),

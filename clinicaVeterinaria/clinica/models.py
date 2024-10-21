@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from datetime import time
 from django.contrib.auth.hashers import make_password, check_password
 
 # Modelo de Usuario
@@ -20,8 +21,8 @@ class Usuario(AbstractUser):
 class Veterinario(models.Model):
     dni = models.OneToOneField(Usuario, on_delete=models.CASCADE, primary_key=True)
     especialidad = models.CharField(max_length=100)
-    hora_entrada = models.TimeField()
-    hora_salida = models.TimeField()
+    hora_entrada = models.TimeField(default=time(7, 0))
+    hora_salida = models.TimeField(default=time(15, 0))
 
     def __str__(self):
         return f"{self.dni.first_name} - {self.especialidad}"

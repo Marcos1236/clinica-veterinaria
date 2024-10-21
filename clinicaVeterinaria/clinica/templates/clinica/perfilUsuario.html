@@ -84,24 +84,24 @@
         <div class="tab-pane fade" id="cambiar-contrasena" role="tabpanel" aria-labelledby="cambiar-contrasena-tab">
             <div class="row justify-content-center">
                 <div class="col-md-6">
-                    <form action="/updatePassword" method="POST">
-
+                    <form action="{% url 'changePassword' %}" method="POST">
+                        {% csrf_token %}
                         <!-- Contraseña Actual -->
                         <div class="form-group" style="margin-bottom: 20px;">
                             <label for="passwordActual">Contraseña Actual:</label>
-                            <input type="password" class="form-control" id="passwordActual" name="passwordActual" required>
+                            <input type="password" class="form-control" id="passwordActual" name="old_password" required>
                         </div>
 
                         <!-- Nueva Contraseña -->
                         <div class="form-group" style="margin-bottom: 20px;">
                             <label for="password">Nueva Contraseña:</label>
-                            <input type="password" class="form-control" id="password" name="password" required>
+                            <input type="password" class="form-control" id="password" name="new_password1" required>
                         </div>
 
                         <!-- Confirmar Nueva Contraseña -->
                         <div class="form-group" style="margin-bottom: 20px;">
                             <label for="confirmPassword">Confirmar Nueva Contraseña:</label>
-                            <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
+                            <input type="password" class="form-control" id="confirmPassword" name="new_password2" required>
                         </div>
 
                         <!-- Botón para actualizar contraseña -->

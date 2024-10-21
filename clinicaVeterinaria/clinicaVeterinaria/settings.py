@@ -67,7 +67,7 @@ MESSAGE_TAGS = {
     messages.ERROR: 'danger',
 }
 
-LOGIN_URL = '/clinica/login/'
+LOGIN_URL = '/login/'
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
@@ -101,10 +101,17 @@ DATABASES = {
         'NAME': 'clinicaveterinaria',
         'USER': 'root',
         'PASSWORD': 'bamboofun1',
-        'HOST': 'localhost',  # O la IP de tu servidor MySQL
+        'HOST': 'db', 
         'PORT': '3306',       # Puerto predeterminado de MySQL
     }
 }
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+]
+
+ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 
 
 
@@ -166,7 +173,7 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            'hosts': [('127.0.0.1', 6379)],
+            'hosts': [('redis', 6379)],
         },
     },
 }

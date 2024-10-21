@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.forms import UserCreationForm
@@ -32,11 +33,13 @@ def generateCode(request):
         if form.is_valid():
             cantidad = form.cleaned_data['cantidad']
             for _ in range(cantidad):
-                # Genera un código único
+                
                 codigo = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
                 CodigoRegistro.objects.create(codigo=codigo)
             messages.success(request, f'Se han generado {cantidad} códigos nuevos.')
             return redirect('generateCode')
+        else:
+            showErrors(request, form)
     else:
         form = GenerarCodigoForm()
     
@@ -54,8 +57,11 @@ def registerClient(request):
 
             Cliente.objects.create(dni=usuario)
 
+            auth_login(request, usuario) 
             messages.success(request, '¡Tu cuenta ha sido creada con éxito!')
             return redirect('calendar')  
+        else:
+            showErrors(request, form)
 
     else:
         form = RegistroForm()
@@ -78,17 +84,22 @@ def registerVet(request):
 
         if form.is_valid():
             usuario = form.save()
-            hora_entrada = "07:00:00"
-            hora_salida = "15:00:00"
-            Veterinario.objects.create(dni=usuario, hora_entrada=hora_entrada, hora_salida=hora_salida)
+
+            form2 = RegistroVetForm(request.POST)
+
+            if form2.is_valid():
+                form2.save()
+            else:
+                showErrors(request, form2)
 
             codigo.utilizado = True
             codigo.save()
 
+            auth_login(request, usuario) 
             messages.success(request, '¡Tu cuenta ha sido creada con éxito!')
             return redirect('calendar')
         else:
-            print("Form no válido. Errores:", form.errors)
+            showErrors(request, form)
 
     else:
         form = RegistroForm()
@@ -180,9 +191,7 @@ def addEvent(request):
             cita.save()
             messages.success(request, 'La cita ha sido creada correctamente.')
         else:
-            for field in form:
-                for error in field.errors:
-                    messages.error(request, f"Error en {field.label}: {error}")
+            showErrors(request, form)
         return redirect('calendar') 
 
 @login_required
@@ -201,9 +210,7 @@ def editEvent(request):
             cita.save()
             messages.info(request, 'La cita ha sido modificada.')
         else:
-            for field in form:
-                for error in field.errors:
-                    messages.error(request, f"Error en {field.label}: {error}")
+            showErrors(request, form)
         return redirect('calendar') 
 @login_required
 def deleteEvent(request):
@@ -232,13 +239,23 @@ def generate_events(citas):
                 'end': end_datetime.strftime("%Y-%m-%dT%H:%M:%S"),
                 'title': f'Cita: {cita.nombre}',
                 'description': cita.motivo,
+                'color': determine_color(cita),
                 'extraParams': {
                     'accepted': cita.aceptada,
                     'type': cita.tipo,
-                    'mascota': Mascota.objects.get(id=cita.idM_id).nombre,
+                    'mascota': Mascota.objects.get(id=cita.idM_id).nombre
                 },
             })
     return events
+
+def determine_color(cita):
+    fecha_inicio = datetime.combine(cita.fecha, cita.hora)
+    if fecha_inicio < datetime.now(): 
+        return 'gray'  
+    elif cita.tipo == 'U':  
+        return 'red'  
+    else:
+        return 'purple' 
 
 
 @login_required
@@ -271,9 +288,7 @@ def addPet(request):
             mascota.save()
             messages.success(request, 'La mascota ha sido creada correctamente.')
         else:
-            for field in form:
-                for error in field.errors:
-                    messages.error(request, f"Error en {field.label}: {error}")
+            showErrors(request, form)
         return redirect('myPets')
 
 @login_required
@@ -306,15 +321,23 @@ def editProfile(request):
         if form.is_valid():
             form.save()
             messages.success(request, "Tu perfil ha sido actualizado correctamente.")
-            return redirect('profile')
         else:
-            for field in form:
-                for error in field.errors:
-                    messages.error(request, f"Error en {field.label}: {error}")
+            showErrors(request, form)
 
-        return redirect('profile')  
+    return redirect('profile')  
 
-    return render(request, 'clinica/perfilUsuario.html', {'usuario': request.user})
+@login_required
+def changePassword(request):
+    if request.method == 'POST':
+        form = PasswordChangeForm(user=request.user, data=request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)
+            messages.success(request, "Tu contraseña ha sido actualizada correctamente.")
+        else:
+            showErrors(request, form)
+
+    return redirect('profile') 
 
 @login_required
 def myAppointments(request):
@@ -385,8 +408,6 @@ def myRequests(request):
         citas_usuario = Citas.objects.filter(dni=request.user.dni, fecha__gt=fecha_actual).order_by('fecha', 'hora')
         solicitudes = []
 
-        print(citas)
-        print(citas_usuario)
         for cita in citas:
             cita_start = datetime.combine(cita.fecha, cita.hora)
 
@@ -443,3 +464,8 @@ def rejectRequest(request):
         return redirect('calendar')  
     else:
         messages.error(request, 'No se puede eliminar la mascota de esta forma.')
+
+def showErrors(request, form):
+    for field in form:
+        for error in field.errors:
+            messages.error(request, f"Error en {field.label}: {error}")

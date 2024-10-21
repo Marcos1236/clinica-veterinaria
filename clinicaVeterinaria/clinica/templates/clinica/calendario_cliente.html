@@ -93,7 +93,7 @@
         }
 
         vets.forEach(vet => {
-            let socket = new WebSocket('ws://localhost:8001/ws/chat/' + vet.dni_id + '/');
+            let socket = new WebSocket('ws://localhost:8000/ws/chat/' + vet.dni_id + '/');
 
             socket.onopen = function() {
                 try {
@@ -460,7 +460,7 @@
                             chatSocket.close();
                         }
 
-                        chatSocket = new WebSocket('ws://localhost:8001/ws/chat/' + chatId + '/');
+                        chatSocket = new WebSocket('ws://localhost:8000/ws/chat/' + chatId + '/');
 
                         chatSocket.onopen = function() {
                             conn = true;

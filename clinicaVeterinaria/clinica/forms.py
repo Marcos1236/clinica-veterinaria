@@ -1,6 +1,11 @@
 from django import forms
 from django.utils import timezone
 from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import PasswordChangeForm as DjangoPasswordChangeForm
+
+class PasswordChangeForm(DjangoPasswordChangeForm):
+    pass
+
 from .models import *
 
 RAZAS_VALIDAS = [
@@ -23,6 +28,27 @@ class RegistroForm(UserCreationForm):
     def save(self, commit=True):
         user = super(RegistroForm, self).save(commit=False)
 
+        if commit:
+            user.save()
+        return user
+    
+class RegistroVetForm(UserCreationForm):
+    class Meta:
+        model = Veterinario
+        fields = ['dni', 'especialidad']
+
+    def clean_dni(self):
+        dni = self.cleaned_data.get('dni')
+        if Veterinario.objects.filter(dni=dni).exists():
+            raise forms.ValidationError("Ya existe un veterinario con ese DNI.")
+        return dni
+
+    def save(self, commit=True):
+        user = super(RegistroVetForm, self).save(commit=False)
+
+        user.hora_entrada = time(7, 0)  
+        user.hora_salida = time(15, 0)
+        
         if commit:
             user.save()
         return user
@@ -80,4 +106,24 @@ class EditCitaForm(forms.ModelForm):
             raise forms.ValidationError("La fecha de la cita no puede ser anterior a la fecha actual.")
         
         return fecha
+    
+class PasswordChangeForm(DjangoPasswordChangeForm):
+    def __init__(self, *args, **kwargs):
+        super(PasswordChangeForm, self).__init__(*args, **kwargs)
+        
+        self.fields['old_password'].error_messages = {
+            'required': 'Por favor, introduce tu contraseña actual.',
+            'invalid': 'La contraseña actual que has ingresado es incorrecta.'
+        }
+        
+        self.fields['new_password1'].error_messages = {
+            'required': 'Debes introducir una nueva contraseña.',
+            'password_mismatch': 'Las contraseñas no coinciden.',
+            'password_too_common': 'Esta contraseña es demasiado común. Elige otra.'
+        }
+
+        self.fields['new_password2'].error_messages = {
+            'required': 'Debes confirmar tu nueva contraseña.',
+            'password_mismatch': 'Las contraseñas no coinciden.'
+        }
     

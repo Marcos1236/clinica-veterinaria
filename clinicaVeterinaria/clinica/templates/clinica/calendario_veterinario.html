@@ -180,10 +180,10 @@
         </div>
         
         <script>
-            let chatSocket = new WebSocket('ws://localhost:8001/ws/chat/' + '{{ user.dni }}' + '/');
+            let chatSocket = new WebSocket('ws://localhost:8000/ws/chat/' + '{{ user.dni }}' + '/');
 
             chatSocket.onopen = function(e) {
-                console.log("Abre chatsocket vet")
+                console.log("Abre chatsocket vet en sala " + '{{ user.dni }}')
             }
             let currentChatId = null;
         
