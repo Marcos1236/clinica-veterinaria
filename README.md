@@ -19,7 +19,7 @@
 Para ejecutar la aplicación, sigue estos pasos:
 
 1. Clona este repositorio en tu máquina local:
-   git clone https://tu-repositorio.git
+   git clone https://github.com/Marcos1236/clinica-veterinaria.git
    cd clinicaVeterinaria
 2. Asegúrate de que Docker y Docker Compose estén instalados y en ejecución en tu máquina.
 
