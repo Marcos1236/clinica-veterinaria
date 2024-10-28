@@ -25,6 +25,8 @@ urlpatterns = [
     path("myRequests/", views.myRequests, name="myRequests"),
     path("acceptRequest/<int:id>/", views.acceptRequest, name="acceptRequest"),
     path("rejectRequest/", views.rejectRequest, name="rejectRequest"),
+    path("historialMedico/", views.HistorialMedico, name="historialMedico"),
+
 ]
 
 if settings.DEBUG:
