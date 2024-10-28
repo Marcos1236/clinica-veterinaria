@@ -1,0 +1,52 @@
+{% extends 'layout_cliente.html' %}
+{% load static %}
+{% block content %}
+<script>
+    function openInfo() {
+        var modal = new bootstrap.Modal(document.getElementById('informacion'));
+        modal.show();
+    }
+</script>
+
+<div class="header mt-4">
+    <h1 class="text-center">Historial Médico</h1>
+</div>
+
+<div class="container my-4">
+    <div class="pet-info">
+        <div class="pet-info d-flex align-items-center">
+            <img src="{{ mascota.foto.url }}" style="width: 150px; height: 150px; border-radius: 50%; object-fit: cover;" alt="Foto de {{ mascota.nombre }}">
+            <div class="ms-4">
+                <h2>{{ mascota.nombre }}</h2>
+                <p><strong>Dueño:</strong> {{ usuario.first_name }} {{ usuario.last_name }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-responsive mt-4">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Tratamiento</th>
+                    <th>Medicación</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cita in citas %}
+                <tr>
+                    <td>{{ cita.fecha }}</td>
+                    <td>{{ cita.tratamiento }}</td>
+                    <td>{{ cita.medicacion }}</td>
+
+                    {% empty %}
+                    <td>{{ mascota.nombre }} no ha tenido ninguna cita aún.</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

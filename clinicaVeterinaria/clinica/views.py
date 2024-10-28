@@ -11,7 +11,6 @@ from django.http import JsonResponse
 from .forms import *
 from .models import *
 from clinicaVeterinaria.asgi import application
-from .forms import HistorialMedicoForm
 from .decorators import es_cliente, es_veterinario
 from django.http import HttpResponse, HttpResponseForbidden
 from datetime import datetime, timedelta
@@ -75,6 +74,8 @@ def registerVet(request):
     
     if request.method == 'POST':
         form = RegistroForm(request.POST)
+        form_veterinario = RegistroVetForm(request.POST)
+
         codigo_ingresado = request.POST.get('codigo_registro')
 
         try:
@@ -83,15 +84,11 @@ def registerVet(request):
             print('Código de registro inválido o ya utilizado.')
             return render(request, 'clinica/registroVeterinario.html', {'form': form})
 
-        if form.is_valid():
+        if form.is_valid() and form_veterinario.is_valid():
             usuario = form.save()
-
-            form2 = RegistroVetForm(request.POST)
-
-            if form2.is_valid():
-                form2.save()
-            else:
-                showErrors(request, form2)
+            especialidad = form_veterinario.cleaned_data.get('especialidad')
+            vet = Veterinario(dni=usuario, especialidad=especialidad)
+            vet.save()
 
             codigo.utilizado = True
             codigo.save()
@@ -281,11 +278,8 @@ def addPet(request):
         if form.is_valid():
             cliente = Cliente.objects.get(dni=request.user)
 
-            historial_medico = HistorialMedico.objects.create()
-
             mascota = form.save(commit=False)
             mascota.dni = cliente
-            mascota.idH = historial_medico
             mascota.save()
             messages.success(request, 'La mascota ha sido creada correctamente.')
         else:
@@ -348,7 +342,7 @@ def myAppointments(request):
 
     if Cliente.objects.filter(dni=user.dni).exists():
         layout = "clinica/layout_cliente.html"
-
+        esCliente = True
         mascotas = Mascota.objects.filter(dni=user.dni)
 
         for mascota in mascotas:
@@ -361,10 +355,12 @@ def myAppointments(request):
                     "hora": cita.hora,
                     "motivo": cita.motivo,
                     "aceptada": cita.aceptada,
-                    "tipo": cita.tipo
+                    "tipo": cita.tipo,
+                    "esCliente" : esCliente
                 })
     elif Veterinario.objects.filter(dni=user.dni).exists():
         citas = Citas.objects.filter(dni=user.dni).order_by('fecha', 'hora')
+        esCliente = False
         for cita in citas:
             citas_usuario.append({
                 "citas_id": cita.id,
@@ -373,7 +369,10 @@ def myAppointments(request):
                 "hora": cita.hora,
                 "motivo": cita.motivo,
                 "aceptada": cita.aceptada,
-                "tipo": cita.tipo
+                "tipo": cita.tipo,
+                "tratamiento" : cita.tratamiento,
+                "medicacion" : cita.medicacion,
+                "esCliente" : esCliente
             })
         layout = "clinica/layout_veterinario.html"
 
@@ -473,33 +472,40 @@ def showErrors(request, form):
 
 
 @login_required
-def historialMedico(request, mascota_id):
-    mascota = get_object_or_404(Mascota, id=mascota_id)
-    historial = historialMedico.html
-    es_veterinario = request.user.groups.filter(name='Veterinarios').exists()
+def historialMedico(request, id):
+    user = request.user
+
+    if Cliente.objects.filter(dni=user.dni).exists():
+        now = timezone.now()
+        citas = Citas.objects.filter(idM=id, fecha__lt=now)
+
+        mascota = get_object_or_404(Mascota, id=id)
+    elif Veterinario.objects.filter(dni=user.dni).exists():
+        return redirect('citas')
     
     context = {
         'mascota': mascota,
-        'historial': historial,
-        'es_veterinario': es_veterinario
+        'citas': citas,
+        'usuario' : user,
     }
     
-    return render(request, template, context)
+    return render(request, 'clinica/historialMedico.html', context)
 
 @login_required
-def modificar_historial_medico(request, historial_id):
-    historial = get_object_or_404(HistorialMedico, id=historial_id)
+def modificarHistorial(request):
+    user = request.user
 
     if request.method == 'POST':
-        form = HistorialMedicoForm(request.POST, instance=historial)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'El historial médico ha sido actualizado correctamente.')
-            return redirect('historial_detalle', historial_id=historial.id)  # Redirige a la vista de detalle del historial
-        else:
-            messages.error(request, 'Error al actualizar el historial médico.')
-    else:
-        form = HistorialMedicoForm(instance=historial)
-
-    return render(request, 'historialMedico.html', {'form': form, 'historial': historial})
-
+        if Veterinario.objects.filter(dni=user.dni).exists():
+            cita_id = request.POST.get("cita_id")
+            cita = get_object_or_404(Citas, id=cita_id)
+            
+            cita.tratamiento = request.POST.get("tratamiento")
+            cita.medicacion = request.POST.get("medicacion")
+            cita.save()
+            
+            messages.success(request, "Historial medico actualizado exitosamente")
+            return redirect('myAppointments')
+        elif Cliente.objects.filter(dni=user.dni).exists():
+            return redirect('citas')
+        

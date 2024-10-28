@@ -21,6 +21,16 @@
             <div class="card-body p-3">
                 <h1 class="text-center mb-3" style="font-size: 20px;">Registro de Usuario</h1>
 
+                {% if messages %}
+                    <div class="alert alert-dismissible">
+                        {% for message in messages %}
+                            <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %}" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
                 <!-- Formulario de Registro -->
                 <form action="{% url 'registerClient' %}" method="POST" class="formulario">
                     {% csrf_token %}

@@ -38,7 +38,10 @@
                         Raza: {{ pet.raza }}<br>
                         Descripción: {{ pet.descripcion }}
                     </p>
-                    <button class="btn btn-primary w-100" onclick="">Historial Medico</button>
+                    <form class="mt-2" action="{% url 'historialMedico' pet.id %}" method="POST">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary w-100">Historial Medico</button>
+                    </form>
                     <form class="mt-2" action="{% url 'deletePet' pet.id %}" method="POST">
                         {% csrf_token %}
                         <button type="submit" class="btn btn-danger w-100">Eliminar</button>

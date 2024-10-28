@@ -35,21 +35,10 @@ class Cliente(models.Model):
         return self.dni.first_name
 
 
-# Modelo de HistorialMedico
-class HistorialMedico(models.Model):
-    id = models.AutoField(primary_key=True)
-    medicacion = models.CharField(max_length=255)
-    descripcion = models.TextField()
-
-    def __str__(self):
-        return f"Historial {self.idM.nombre} - {self.medicacion}"
-
-
 # Modelo de Mascota
 class Mascota(models.Model):
     id = models.AutoField(primary_key=True)
     dni = models.ForeignKey(Cliente, on_delete=models.CASCADE)
-    idH= models.ForeignKey(HistorialMedico, on_delete=models.CASCADE)
     nombre = models.CharField(max_length=100)
     edad = models.IntegerField()
     raza = models.CharField(max_length=100)
@@ -76,6 +65,8 @@ class Citas(models.Model):
     motivo = models.CharField(max_length=255)
     aceptada = models.BooleanField(default=False)
     tipo = models.CharField(max_length=1, choices=TIPO_CONSULTA)
+    tratamiento = models.CharField(max_length=255, null=True)
+    medicacion = models.CharField(max_length=255, null=True)
 
     def __str__(self):
         return f"Cita: {self.id} - {self.motivo}"

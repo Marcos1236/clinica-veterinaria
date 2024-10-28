@@ -32,10 +32,10 @@ class RegistroForm(UserCreationForm):
             user.save()
         return user
     
-class RegistroVetForm(UserCreationForm):
+class RegistroVetForm(forms.ModelForm):
     class Meta:
         model = Veterinario
-        fields = ['dni', 'especialidad']
+        fields = ['especialidad']
 
     def clean_dni(self):
         dni = self.cleaned_data.get('dni')
@@ -125,23 +125,6 @@ class PasswordChangeForm(DjangoPasswordChangeForm):
         self.fields['new_password2'].error_messages = {
             'required': 'Debes confirmar tu nueva contraseña.',
             'password_mismatch': 'Las contraseñas no coinciden.'
-        }
-
-class HistorialMedicoForm(forms.ModelForm):
-    class Meta:
-        model = HistorialMedico
-        fields = ['medicacion', 'descripcion']
-
-        widgets = {
-            'medicacion': forms.TextInput(attrs={
-                'class': 'form-control', 
-                'placeholder': 'Ingrese la medicación'
-            }),
-            'descripcion': forms.Textarea(attrs={
-                'class': 'form-control', 
-                'placeholder': 'Descripción del historial',
-                'rows': 4
-            }),
         }
     
     

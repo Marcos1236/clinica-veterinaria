@@ -7,6 +7,15 @@
         var modal = new bootstrap.Modal(document.getElementById('informacion'));
         modal.show();
     }
+
+
+    $(document).ready(function () {
+        $('[id^="botonModificarHistorial-"]').click(function () { 
+            let citaId = $(this).data('info');
+            document.getElementById('cita-id-hidden').value = citaId;
+            console.log("Cita " + citaId);
+        });
+    });
 </script>
 
 <style>
@@ -33,6 +42,41 @@
         {% endfor %}
     </div>
 {% endif %}
+
+<div class="modal fade" id="modalModificarHistorial" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" action="{% url 'modificarHistorial' %}">
+                {% csrf_token %}
+
+                <input type="hidden" name="cita_id" id="cita-id-hidden">
+                
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalLabel">Modificar Historial</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="tratamiento" class="form-label">Tratamiento</label>
+                        <textarea type="text" name="tratamiento" id="tratamiento" class="form-control" rows="2" required></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="medicacion" class="form-label">Medicación</label>
+                        <textarea type="text" name="medicacion" id="medicacion" class="form-control" rows="3" required></textarea>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 
 <div class="container my-4 mt-5"> 
     <h1 class="text-center">Mis Citas</h1>
@@ -93,6 +137,15 @@
                         <p><strong>Fecha:</strong> {{ cita.fecha|date:"d/m/Y" }}</p>
                         <p><strong>Hora:</strong> {{ cita.hora|time:"h:i A" }}</p>
                         <p><strong>Descripción:</strong> {{ cita.motivo }}</p>
+                        {% if not cita.esCliente%}
+                            {% if not cita.tratamiento or not cita.medicacion %}
+                                <button data-bs-toggle="modal" data-bs-target="#modalModificarHistorial" 
+                                        data-info="{{ cita.citas_id }}" class="btn btn-danger" id="botonModificarHistorial-{{ cita.id }}">
+                                    <label class="me-2">Modificar historial</label>
+                                    <i class="fa-solid fa-pen"></i>
+                                </button>
+                            {% endif %}
+                        {% endif %}
                     </div>
                 </div>
                 {% empty %}
