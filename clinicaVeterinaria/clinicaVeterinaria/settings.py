@@ -101,7 +101,7 @@ DATABASES = {
         'NAME': 'clinicaveterinaria',
         'USER': 'root',
         'PASSWORD': 'bamboofun1',
-        'HOST': 'db', 
+        'HOST': 'localhost', 
         'PORT': '3306',       # Puerto predeterminado de MySQL
     }
 }
