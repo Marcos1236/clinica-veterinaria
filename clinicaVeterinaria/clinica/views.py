@@ -11,6 +11,7 @@ from django.http import JsonResponse
 from .forms import *
 from .models import *
 from clinicaVeterinaria.asgi import application
+from .forms import HistorialMedicoForm
 from .decorators import es_cliente, es_veterinario
 from django.http import HttpResponse, HttpResponseForbidden
 from datetime import datetime, timedelta
@@ -469,3 +470,36 @@ def showErrors(request, form):
     for field in form:
         for error in field.errors:
             messages.error(request, f"Error en {field.label}: {error}")
+
+
+@login_required
+def historialMedico(request, mascota_id):
+    mascota = get_object_or_404(Mascota, id=mascota_id)
+    historial = historialMedico.html
+    es_veterinario = request.user.groups.filter(name='Veterinarios').exists()
+    
+    context = {
+        'mascota': mascota,
+        'historial': historial,
+        'es_veterinario': es_veterinario
+    }
+    
+    return render(request, template, context)
+
+@login_required
+def modificar_historial_medico(request, historial_id):
+    historial = get_object_or_404(HistorialMedico, id=historial_id)
+
+    if request.method == 'POST':
+        form = HistorialMedicoForm(request.POST, instance=historial)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'El historial médico ha sido actualizado correctamente.')
+            return redirect('historial_detalle', historial_id=historial.id)  # Redirige a la vista de detalle del historial
+        else:
+            messages.error(request, 'Error al actualizar el historial médico.')
+    else:
+        form = HistorialMedicoForm(instance=historial)
+
+    return render(request, 'historialMedico.html', {'form': form, 'historial': historial})
+
