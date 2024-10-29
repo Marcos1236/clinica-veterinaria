@@ -101,7 +101,7 @@ DATABASES = {
         'NAME': 'clinicaveterinaria',
         'USER': 'root',
         'PASSWORD': 'bamboofun1',
-        'HOST': 'localhost', 
+        'HOST': 'db', 
         'PORT': '3306',       # Puerto predeterminado de MySQL
     }
 }
@@ -154,6 +154,7 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:8000",

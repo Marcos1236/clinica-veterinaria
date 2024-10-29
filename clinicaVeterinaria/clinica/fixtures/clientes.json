@@ -1,0 +1,52 @@
+[
+    {
+        "model": "clinica.usuario",
+        "pk": "12345678A",
+        "fields": {
+            "username": "cliente1",
+            "first_name": "Juan",
+            "last_name": "Pérez",
+            "email": "juan.perez@example.com",
+            "dni": "12345678A",
+            "telefono": "555123456",
+            "direccion": "Calle Falsa 123",
+            "ciudad": "Madrid",
+            "pais": "España",
+            "codigo_postal": "28001",
+            "password": "pbkdf2_sha256$870000$UtBtRUW9OPtpEbhAb9WFTj$7LXZVPEROQhd4P2CbhG+fNEq1bXQEylen0EYo0iXpQA=",
+            "foto": "usuarios_fotos/defaultPFP.jpg"
+        }
+    },
+    {
+        "model": "clinica.cliente",
+        "pk": "12345678A",
+        "fields": {
+            "dni": "12345678A"
+        }
+    },
+    {
+        "model": "clinica.usuario",
+        "pk": "87654321B",
+        "fields": {
+            "username": "cliente2",
+            "first_name": "Ana",
+            "last_name": "Gómez",
+            "email": "ana.gomez@example.com",
+            "dni": "87654321B",
+            "telefono": "555654321",
+            "direccion": "Avenida Siempre Viva 742",
+            "ciudad": "Barcelona",
+            "pais": "España",
+            "codigo_postal": "08001",
+            "password": "pbkdf2_sha256$870000$UtBtRUW9OPtpEbhAb9WFTj$7LXZVPEROQhd4P2CbhG+fNEq1bXQEylen0EYo0iXpQA=",
+            "foto": "usuarios_fotos/defaultPFP.jpg"
+        }
+    },
+    {
+        "model": "clinica.cliente",
+        "pk": "87654321B",
+        "fields": {
+            "dni": "87654321B"
+        }
+    }
+]

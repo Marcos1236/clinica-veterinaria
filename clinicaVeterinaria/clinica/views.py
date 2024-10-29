@@ -20,6 +20,10 @@ import string
 import json
 import traceback
 
+FECHA_HORA_VALIDA = 0
+FECHA_HORA_ANTIGUA = 1
+VET_NO_DISPONIBLES = 2
+
 
 def index(request):
     if request.user.is_authenticated:
@@ -81,7 +85,7 @@ def registerVet(request):
         try:
             codigo = CodigoRegistro.objects.get(codigo=codigo_ingresado, utilizado=False)
         except CodigoRegistro.DoesNotExist:
-            print('Código de registro inválido o ya utilizado.')
+            messages.error(request, 'Código de registro inválido o ya utilizado.')
             return render(request, 'clinica/registroVeterinario.html', {'form': form})
 
         if form.is_valid() and form_veterinario.is_valid():
@@ -134,6 +138,7 @@ def calendar(request):
         mascotas = Mascota.objects.filter(dni=user.dni)
         citas = Citas.objects.filter(idM__in=mascotas)
 
+        horas_jornada = []
         vets = []
         allVets = Veterinario.objects.all()
 
@@ -141,7 +146,15 @@ def calendar(request):
             user = Usuario.objects.get(dni=vet.dni_id)
             nombre = user.first_name
             apellidos = user.last_name
-   
+
+            jornada_inicio = datetime.combine(timezone.now().date(), vet.hora_entrada)
+            jornada_fin = datetime.combine(timezone.now().date(), vet.hora_salida)
+            
+            horas_jornada = [
+                (jornada_inicio + timedelta(hours=i)).strftime('%H:%M')
+                for i in range(int((jornada_fin - jornada_inicio).total_seconds() // 3600) + 1)
+            ]
+            
             vets.append({
                 'dni_id': vet.dni_id,
                 'first_name': nombre,  
@@ -165,6 +178,7 @@ def calendar(request):
             'mascotas': mascotas,
             'vets': json.dumps(vets),
             'user' : request.user,
+            'horas' :horas_jornada,
         }
         return render(request, 'clinica/calendario_cliente.html', context)
 
@@ -185,6 +199,7 @@ def addEvent(request):
         form = CitaForm(request.POST)
         if form.is_valid():
             cita = form.save(commit=False)
+
             cita.tipo = 'U' if 'tipo' in request.POST else 'R'
             cita.save()
             messages.success(request, 'La cita ha sido creada correctamente.')
@@ -197,11 +212,11 @@ def editEvent(request):
     if request.method == 'POST':
         
         try:
-            cita = Citas.objects.get(id=request.POST.get('cita_id'))  # Cambia 'Cita' por el nombre real de tu modelo
+            cita = Citas.objects.get(id=request.POST.get('cita_id'))  
         except Citas.DoesNotExist:
             messages.error(request, 'La cita no existe.')
             return redirect('calendar')
-        
+
         form = EditCitaForm(request.POST, request.FILES, instance=cita)
         if form.is_valid():
             cita = form.save(commit=False)
@@ -210,6 +225,7 @@ def editEvent(request):
         else:
             showErrors(request, form)
         return redirect('calendar') 
+
 @login_required
 def deleteEvent(request):
     id = request.POST.get('cita_id')
@@ -466,9 +482,15 @@ def rejectRequest(request):
         messages.error(request, 'No se puede eliminar la mascota de esta forma.')
 
 def showErrors(request, form):
+    if '__all__' in form.errors:
+        for error in form.errors['__all__']:
+            messages.error(request, f"Error: {error}")
+
     for field in form:
         for error in field.errors:
+            
             messages.error(request, f"Error en {field.label}: {error}")
+    
 
 
 @login_required

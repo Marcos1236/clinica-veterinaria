@@ -8,7 +8,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         self.chat_id = self.scope['url_route']['kwargs']['chat_id']
         self.chat_group_name = f'chat_{self.chat_id}'
         self.user_id = self.scope['user'].dni
-
+        
         if self.chat_id not in connected_users:
             connected_users[self.chat_id] = set()
 
@@ -40,17 +40,24 @@ class ChatConsumer(AsyncWebsocketConsumer):
         recipient = data['recipient']  
 
         if message == "new_chat":
-            await self.channel_layer.group_send(
-                f'chat_{recipient}', 
-                {
-                    'type': 'new_chat', 
-                    'client_name': sender,  
-                    'client_id': self.chat_id,  
-                }
+            if len(connected_users[recipient]) == 2:
+                await self.channel_layer.group_send(
+                    f'chat_{recipient}', 
+                    {
+                        'type': 'new_chat', 
+                        'client_name': sender,  
+                        'client_id': self.chat_id,  
+                    }
+                )
+            else:
+                await self.channel_layer.group_send(
+                    f'chat_{recipient}', 
+                    {
+                        'type': 'close_connection',  
+                    }
             )
         elif message == "check_connection":
-
-            if len(connected_users[recipient]) > 1:
+            if len(connected_users[recipient]) == 2:
                 success = True
             else:
                 success = False

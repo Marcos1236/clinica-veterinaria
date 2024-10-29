@@ -1,0 +1,58 @@
+[
+    {
+        "model": "clinica.usuario",
+        "pk": "12345678B",
+        "fields": {
+            "username": "veterinario1",
+            "first_name": "Carlos",
+            "last_name": "López",
+            "email": "carlos.lopez@example.com",
+            "dni": "12345678B",
+            "telefono": "555987654",
+            "direccion": "Calle Salud 456",
+            "ciudad": "Madrid",
+            "pais": "España",
+            "codigo_postal": "28001",
+            "password": "pbkdf2_sha256$870000$UtBtRUW9OPtpEbhAb9WFTj$7LXZVPEROQhd4P2CbhG+fNEq1bXQEylen0EYo0iXpQA=",
+            "foto": "usuarios_fotos/defaultPFP.jpg"
+        }
+    },
+    {
+        "model": "clinica.veterinario",
+        "pk": "12345678B",
+        "fields": {
+            "dni": "12345678B",
+            "especialidad": "Cirugía Veterinaria",
+            "hora_entrada": "07:00:00",
+            "hora_salida": "15:00:00"
+        }
+    },
+    {
+        "model": "clinica.usuario",
+        "pk": "87654321A",
+        "fields": {
+            "username": "veterinario2",
+            "first_name": "María",
+            "last_name": "García",
+            "email": "maria.garcia@example.com",
+            "dni": "87654321A",
+            "telefono": "555321987",
+            "direccion": "Avenida de los Animales 789",
+            "ciudad": "Barcelona",
+            "pais": "España",
+            "codigo_postal": "08001",
+            "password": "pbkdf2_sha256$870000$UtBtRUW9OPtpEbhAb9WFTj$7LXZVPEROQhd4P2CbhG+fNEq1bXQEylen0EYo0iXpQA=",
+            "foto": "usuarios_fotos/defaultPFP.jpg"
+        }
+    },
+    {
+        "model": "clinica.veterinario",
+        "pk": "87654321A",
+        "fields": {
+            "dni": "87654321A",
+            "especialidad": "Dermatología Veterinaria",
+            "hora_entrada": "08:00:00",
+            "hora_salida": "16:00:00"
+        }
+    }
+]

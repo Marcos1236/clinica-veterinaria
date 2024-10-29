@@ -1,0 +1,162 @@
+[
+    {
+        "model": "clinica.citas",
+        "pk": 1,
+        "fields": {
+            "idM": 1,
+            "dni": null,  
+            "nombre": "Cita de Rex",
+            "fecha": "2024-11-01T10:00:00Z",
+            "hora": "10:00:00",
+            "motivo": "Revisión general",
+            "aceptada": false,
+            "tipo": "R",
+            "tratamiento": null,
+            "medicacion": null
+        }
+    },
+    {
+        "model": "clinica.citas",
+        "pk": 2,
+        "fields": {
+            "idM": 1,
+            "dni": null,
+            "nombre": "Cita de Rex",
+            "fecha": "2024-11-05T10:30:00Z",
+            "hora": "10:30:00",
+            "motivo": "Vacunas",
+            "aceptada": false,
+            "tipo": "R",
+            "tratamiento": null,
+            "medicacion": null
+        }
+    },
+    {
+        "model": "clinica.citas",
+        "pk": 3,
+        "fields": {
+            "idM": 1,
+            "dni": null,
+            "nombre": "Cita de Rex",
+            "fecha": "2024-11-10T09:00:00Z",
+            "hora": "09:00:00",
+            "motivo": "Chequeo de salud",
+            "aceptada": false,
+            "tipo": "R",
+            "tratamiento": null,
+            "medicacion": null
+        }
+    },
+    {
+        "model": "clinica.citas",
+        "pk": 4,
+        "fields": {
+            "idM": 2,
+            "dni": null,
+            "nombre": "Cita de Luna",
+            "fecha": "2024-11-01T11:00:00Z",
+            "hora": "11:00:00",
+            "motivo": "Consulta de alergias",
+            "aceptada": false,
+            "tipo": "R",
+            "tratamiento": null,
+            "medicacion": null
+        }
+    },
+    {
+        "model": "clinica.citas",
+        "pk": 5,
+        "fields": {
+            "idM": 2,
+            "dni": null,
+            "nombre": "Cita de Luna",
+            "fecha": "2024-11-07T14:00:00Z",
+            "hora": "14:00:00",
+            "motivo": "Revisión de salud",
+            "aceptada": false,
+            "tipo": "R",
+            "tratamiento": null,
+            "medicacion": null
+        }
+    },
+    {
+        "model": "clinica.citas",
+        "pk": 6,
+        "fields": {
+            "idM": 3,
+            "dni": null,
+            "nombre": "Cita de Bola de Nieve",
+            "fecha": "2024-11-02T10:00:00Z",
+            "hora": "10:00:00",
+            "motivo": "Consulta de comportamiento",
+            "aceptada": false,
+            "tipo": "R",
+            "tratamiento": null,
+            "medicacion": null
+        }
+    },
+    {
+        "model": "clinica.citas",
+        "pk": 7,
+        "fields": {
+            "idM": 3,
+            "dni": null,
+            "nombre": "Cita de Bola de Nieve",
+            "fecha": "2024-11-04T12:30:00Z",
+            "hora": "12:30:00",
+            "motivo": "Chequeo de salud",
+            "aceptada": false,
+            "tipo": "R",
+            "tratamiento": null,
+            "medicacion": null
+        }
+    },
+    {
+        "model": "clinica.citas",
+        "pk": 8,
+        "fields": {
+            "idM": 3,
+            "dni": null,
+            "nombre": "Cita de Bola de Nieve",
+            "fecha": "2024-11-06T09:00:00Z",
+            "hora": "09:00:00",
+            "motivo": "Vacunas",
+            "aceptada": false,
+            "tipo": "R",
+            "tratamiento": null,
+            "medicacion": null
+        }
+    },
+    {
+        "model": "clinica.citas",
+        "pk": 9,
+        "fields": {
+            "idM": 4,
+            "dni": null,
+            "nombre": "Cita de Salem",
+            "fecha": "2024-11-02T11:00:00Z",
+            "hora": "11:00:00",
+            "motivo": "Revisión general",
+            "aceptada": false,
+            "tipo": "R",
+            "tratamiento": null,
+            "medicacion": null
+        }
+    },
+    {
+        "model": "clinica.citas",
+        "pk": 10,
+        "fields": {
+            "idM": 4,
+            "dni": null,
+            "nombre": "Cita de Salem",
+            "fecha": "2024-11-05T15:00:00Z",
+            "hora": "15:00:00",
+            "motivo": "Chequeo de salud",
+            "aceptada": false,
+            "tipo": "R",
+            "tratamiento": null,
+            "medicacion": null
+        }
+    }
+]

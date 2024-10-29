@@ -113,19 +113,18 @@
                 if (data.type == 'check_connection') { 
                     if(data.success == true) {
                         listaVeterinarios.insertAdjacentHTML('beforeend',`
-                        <li class="list-group-item chat-option" data-chat="${vet.dni_id}" data-bs-toggle="modal" data-bs-target="#chatModal">
-                            ${vet.first_name} ${vet.last_name}
-                        </li>
-                    `);
+                            <li class="list-group-item chat-option" data-chat="${vet.dni_id}" data-bs-toggle="modal" data-bs-target="#chatModal">
+                                ${vet.first_name} ${vet.last_name}
+                            </li>
+                        `);
+                        
                     } else {
                         console.log("No se pudo conectar")
-                    }    
+                    }
+                    socket.close()    
                 }
             };
-
-            socket.onerror = function(error) {
-                console.error("Error en WebSocket:", error);
-            };
+            
             
         });
     }
@@ -222,15 +221,9 @@
                         <label for="horaCitaCrear" class="form-label">Hora</label>
                         <select class="form-select" id="hora" name="hora" required>
                             <option value="">Seleccione una hora</option>
-                            <option value="08:00">08:00</option>
-                            <option value="09:00">09:00</option>
-                            <option value="10:00">10:00</option>
-                            <option value="11:00">11:00</option>
-                            <option value="12:00">12:00</option>
-                            <option value="16:00">16:00</option>
-                            <option value="17:00">17:00</option>
-                            <option value="18:00">18:00</option>
-                            <option value="19:00">19:00</option>
+                            {% for hora in horas %}
+                                <option value="{{ hora }}">{{ hora }}</option>
+                            {% endfor %}
                         </select>
                     </div>
 
@@ -282,15 +275,9 @@
                         <label for="horaCitaCrear" class="form-label">Hora</label>
                         <select class="form-select" id="hora" name="hora" required>
                         <option value="">Seleccione una hora</option>
-                        <option value="08:00">08:00</option>
-                        <option value="09:00">09:00</option>
-                        <option value="10:00">10:00</option>
-                        <option value="11:00">11:00</option>
-                        <option value="12:00">12:00</option>
-                        <option value="16:00">16:00</option>
-                        <option value="17:00">17:00</option>
-                        <option value="18:00">18:00</option>
-                        <option value="19:00">19:00</option>
+                        {% for hora in horas %}
+                            <option value="{{ hora }}">{{ hora }}</option>
+                        {% endfor %}
                         </select>
                     </div>
                     <button type="submit" class="btn btn-primary">Modificar</button>
@@ -481,6 +468,9 @@
                                 `); 
                             } else if (data.type == 'close_connection'){
                                 conn = false
+                                chatSocket.close()
+                                const message = encodeURIComponent("La conexión se ha cerrado.");
+                                window.location.href = `/calendar?error=${message}`;
                             }
                         };
 

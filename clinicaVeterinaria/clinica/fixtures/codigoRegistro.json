@@ -1,0 +1,18 @@
+[
+    {
+        "model": "clinica.codigoregistro",
+        "pk": 1,
+        "fields": {
+            "codigo": "AB123CD4",
+            "utilizado": true
+        }
+    },
+    {
+        "model": "clinica.codigoregistro",
+        "pk": 2,
+        "fields": {
+            "codigo": "EF567GH8",
+            "utilizado": true
+        }
+    }
+]

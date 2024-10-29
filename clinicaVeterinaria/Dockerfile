@@ -17,4 +17,4 @@ COPY . .
 EXPOSE 8000
 
 # Comando para ejecutar el servidor Daphne
-CMD ["daphne", "-u", "/tmp/daphne.sock", "myproject.asgi:application"]  # Asegúrate de ajustar el nombre del proyecto
+CMD ["daphne", "-u", "/tmp/daphne.sock", "clinicaVeterinaria.asgi:application"]  

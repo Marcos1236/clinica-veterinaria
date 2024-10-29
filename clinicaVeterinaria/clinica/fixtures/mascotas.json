@@ -1,0 +1,50 @@
+[
+    {
+        "model": "clinica.mascota",
+        "pk": 1,
+        "fields": {
+            "dni": "12345678A",
+            "nombre": "Rex",
+            "edad": 5,
+            "raza": "Retriever",
+            "descripcion": "Rex es un perro muy leal y juguetón.",
+            "foto": "mascotas_fotos/default-dog1.jpg"
+        }
+    },
+    {
+        "model": "clinica.mascota",
+        "pk": 2,
+        "fields": {
+            "dni": "12345678A",
+            "nombre": "Luna",
+            "edad": 3,
+            "raza": "Bulldog",
+            "descripcion": "Luna es una perra dulce y cariñosa.",
+            "foto": "mascotas_fotos/default-dog2.jpg"
+        }
+    },
+    {
+        "model": "clinica.mascota",
+        "pk": 3,
+        "fields": {
+            "dni": "87654321B",
+            "nombre": "Bola de Nieve",
+            "edad": 4,
+            "raza": "Gato Persa",
+            "descripcion": "Bola de Nieve es un gato muy tranquilo y amistoso.",
+            "foto": "mascotas_fotos/default-cat2.jpg"
+        }
+    },
+    {
+        "model": "clinica.mascota",
+        "pk": 4,
+        "fields": {
+            "dni": "87654321B",
+            "nombre": "Rocky",
+            "edad": 2,
+            "raza": "Gato Negro",
+            "descripcion": "Rocky es un gato curioso y travieso.",
+            "foto": "mascotas_fotos/default-cat1.jpg"
+        }
+    }
+]
