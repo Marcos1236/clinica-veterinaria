@@ -25,14 +25,14 @@ Para ejecutar la aplicación, sigue estos pasos:
 
 A partir de aquí podemos desplegar la aplicación de dos formas:
 
-3-1. Si deseamos construir el contenedor de docker por nuestra cuenta y estamos familiarizados con estos comandos podemos construir e iniciar el contenedor con:
+3. Si deseamos construir el contenedor de docker por nuestra cuenta y estamos familiarizados con estos comandos podemos construir e iniciar el contenedor con:
     docker-compose up --build
 
-3-2. Si, por el contrario, deseamos una opción más cómoda y sencilla, podemos usar el ejecutable "ClinicaVeterinaria.exe", el cual pone en funcionamiento los contenedores, realiza
+4. Si, por el contrario, deseamos una opción más cómoda y sencilla, podemos usar el ejecutable "ClinicaVeterinaria.exe", el cual pone en funcionamiento los contenedores, realiza
     las migraciones no aplicadas y crea un usuario administrador en caso de que no exista. Recomendamos esta opción al menos la primera vez que se ejecute la aplicación par asegurarnos
     de que todo está correctamente configurado.
 
-4. En caso de que se desee poblar la base de datos con datos de pruebe, podemos ejecutar en el contenedor docker llamado web: 
+5. En caso de que se desee poblar la base de datos con datos de pruebe, podemos ejecutar en el contenedor docker llamado web: 
     python manage.py loaddata clinica/fixatures/*
 
-5. La aplicación estará disponible en http://localhost:8000.
+6. La aplicación estará disponible en http://localhost:8000.
