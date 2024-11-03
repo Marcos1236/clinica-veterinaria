@@ -1,6 +1,5 @@
 from django import forms
 from django.utils import timezone
-from datetime import datetime
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.forms import PasswordChangeForm as DjangoPasswordChangeForm
 
@@ -19,6 +18,10 @@ class RegistroForm(UserCreationForm):
         model = Usuario
         fields = ['username', 'first_name', 'last_name', 'email', 'dni', 'telefono', 'direccion', 'ciudad', 'pais', 'codigo_postal', 'password1', 'password2']
     
+    def clean(self):
+       if len(self.password1) < 8:
+        raise forms.ValidationError('La contraseña debe tener al menos 8 caracteres.')
+       
     def clean_dni(self):
         dni = self.cleaned_data.get('dni')
         
@@ -86,29 +89,13 @@ class CitaForm(forms.ModelForm):
         model = Citas
         fields = ['nombre', 'idM', 'fecha', 'hora', 'motivo']
     
-    def clean(self):
-        cleaned_data = super().clean()
-        fecha = cleaned_data.get('fecha')
-        hora = cleaned_data.get('hora')
-        mascota = cleaned_data.get('idM')
+    def clean_fecha(self):
+        fecha = self.cleaned_data.get('fecha')
 
-        if fecha and hora:
-            fecha_hora_cita = timezone.make_aware(datetime.combine(fecha, hora))
-            if fecha_hora_cita <= timezone.now():
-                raise forms.ValidationError("La fecha y hora de la cita deben ser futuras.", code="Fecha")
-
-
-        if mascota and fecha and hora:
-            if Citas.objects.filter(idM=mascota, fecha=fecha, hora=hora).exists():
-                raise forms.ValidationError("La mascota ya tiene una cita en esta fecha y hora.")
-
-        veterinarios_ocupados = Citas.objects.filter(fecha=fecha, hora=hora).values_list('dni', flat=True)
-        veterinarios_disponibles = Veterinario.objects.exclude(dni__in=veterinarios_ocupados)
-
-        if not veterinarios_disponibles:
-            raise forms.ValidationError("No hay veterinarios disponibles para esta fecha y hora.")
-
-        return cleaned_data
+        if fecha.date() < timezone.now().date():
+            raise forms.ValidationError("La fecha de la cita no puede ser anterior a la fecha actual.")
+        
+        return fecha
 
 class EditCitaForm(forms.ModelForm):
 
@@ -116,28 +103,13 @@ class EditCitaForm(forms.ModelForm):
         model = Citas
         fields = ['fecha', 'hora']
     
-    def clean(self):
-        cleaned_data = super().clean()
-        fecha = cleaned_data.get('fecha')
-        hora = cleaned_data.get('hora')
+    def clean_fecha(self):
+        fecha = self.cleaned_data.get('fecha')
 
-        if fecha and hora:
-            fecha_hora_cita = timezone.make_aware(datetime.combine(fecha, hora))
-            if fecha_hora_cita <= timezone.now():
-                raise forms.ValidationError("La fecha y hora de la cita deben ser futuras.")
-
-
-        if fecha and hora:
-            if Citas.objects.filter(fecha=fecha, hora=hora).exists():
-                raise forms.ValidationError("La mascota ya tiene una cita en esta fecha y hora.")
-
-        veterinarios_ocupados = Citas.objects.filter(fecha=fecha, hora=hora).values_list('dni', flat=True)
-        veterinarios_disponibles = Veterinario.objects.exclude(dni__in=veterinarios_ocupados)
-
-        if not veterinarios_disponibles:
-            raise forms.ValidationError("No hay veterinarios disponibles para esta fecha y hora.")
-
-        return cleaned_data
+        if fecha.date() < timezone.now().date():
+            raise forms.ValidationError("La fecha de la cita no puede ser anterior a la fecha actual.")
+        
+        return fecha
     
 class PasswordChangeForm(DjangoPasswordChangeForm):
     def __init__(self, *args, **kwargs):

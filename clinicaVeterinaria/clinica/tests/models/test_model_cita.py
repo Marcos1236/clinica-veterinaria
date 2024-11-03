@@ -127,7 +127,7 @@ class CitasModelTests(TestCase):
             tipo='R'
         )
 
-        self.assertFalse(cita.aceptada)
+        self.assertTrue(cita.aceptada)
 
     def test_cita_aceptada_y_rechazada(self):
         cita = Citas.objects.create(

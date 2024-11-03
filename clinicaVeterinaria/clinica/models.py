@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from datetime import time
 from django.contrib.auth.hashers import make_password, check_password
+from django.core.exceptions import ValidationError
+
 
 # Modelo de Usuario
 class Usuario(AbstractUser):
@@ -13,6 +15,11 @@ class Usuario(AbstractUser):
     codigo_postal = models.CharField(max_length=10)
     password = models.CharField(max_length=100)
     foto = models.ImageField(upload_to='usuarios_fotos/', blank=True, default="../static/images/defaultPFP.jpg")
+
+    def clean(self):
+        super().clean()
+        if len(self.password) < 8:
+            raise ValidationError("La longitud de la contraseña debe ser de mas de 8 caracteres.") 
 
     def __str__(self):
         return self.first_name
@@ -43,8 +50,13 @@ class Mascota(models.Model):
     edad = models.IntegerField()
     raza = models.CharField(max_length=100)
     descripcion = models.TextField()
-    foto = models.ImageField(upload_to='mascotas_fotos/')
+    foto = models.ImageField(upload_to='mascotas_fotos/', blank=True, null=True)
 
+    def clean(self):
+        super().clean()
+        if self.edad < 0:
+            raise ValidationError("La edad no puede ser negativa.") 
+        
     def __str__(self):
         return self.nombre
 

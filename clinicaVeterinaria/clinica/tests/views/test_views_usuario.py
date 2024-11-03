@@ -16,6 +16,15 @@ class UsuarioViewTest(TestCase):
         self.vet = Veterinario.objects.create(dni=self.vet_user)
 
         self.codigo_registro = CodigoRegistro.objects.create(codigo='ABC12345', utilizado=False)
+        
+        self.mascota = Mascota.objects.create(
+            dni=self.cliente,
+            nombre='Rex',
+            edad=5,
+            raza='Labrador',
+            descripcion='Perro amistoso',
+            foto=None 
+        )
 
 
     def test_index_view(self):
@@ -68,8 +77,8 @@ class UsuarioViewTest(TestCase):
         # Registro de cliente
         response = self.client.post(reverse('registerClient'), {
             'username': 'newuser',
-            'password1': 'admin321',
-            'password2': 'admin321',
+            'password1': 'admin3211',
+            'password2': 'admin3211',
             'email': 'test@test.com',
             'dni': '12345678L',
             'first_name': 'Nuevo',
@@ -83,3 +92,16 @@ class UsuarioViewTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('calendar'))
         self.assertTrue(Usuario.objects.filter(username='newuser').exists())
+
+
+    def test_access_client_profile_view(self):
+        User = get_user_model() 
+        self.user = User.objects.create_user(dni='123456278Z', username='testuser', password='123456789')
+        self.cliente = Cliente.objects.create(dni=self.user)
+
+        # Asegúrate de que el usuario puede acceder a su perfil
+        self.client.login(username='testuser', password='123456789')
+        response = self.client.get(reverse('profile', args=[self.user.id]))  
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'clinica/perfilUsuario.html')  
+

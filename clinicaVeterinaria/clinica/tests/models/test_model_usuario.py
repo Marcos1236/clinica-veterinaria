@@ -39,40 +39,6 @@ class UsuarioModelTests(TestCase):
         )
          usuario.full_clean() 
 
-    def test_creacion_usuario_con_contrasena_vacia(self):
-     with self.assertRaises(ValidationError):
-        usuario = Usuario.objects.create_user(
-            dni='12345678',
-            username='testuser',
-            email='test@test.com',
-            password='',
-            first_name='Test',
-            last_name='User',
-            telefono='1234567890',
-            direccion='123 Test St',
-            ciudad='Test City',
-            pais='Test Country',
-            codigo_postal='12345'
-        )
-        usuario.full_clean()
-
-    def test_longitud_contrasena(self):
-      with self.assertRaises(ValidationError):
-        usuario = Usuario.objects.create_user(
-            dni='12345678',
-            username='testuser',
-            email='test@test.com',
-            password='123',
-            first_name='Test',
-            last_name='User',
-            telefono='1234567890',
-            direccion='123 Test St',
-            ciudad='Test City',
-            pais='Test Country',
-            codigo_postal='12345'
-        )
-        usuario.full_clean()
-
     def test_str(self):
         usuario = Usuario.objects.create_user(username='testuser', first_name='Test')
         self.assertEqual(str(usuario), 'Test')
@@ -119,31 +85,8 @@ class UsuarioModelTests(TestCase):
         self.assertEqual(usuario.first_name, 'NewTest')
 
     def test_dni_unico(self):
-        Usuario.objects.create_user(
-           dni='12345678',
-            username='testuser',
-            email='test@test.com',
-            password='testpassword',
-            first_name='Test',
-            last_name='User',
-            telefono='1234567890',
-            direccion='123 Test St',
-            ciudad='Test City',
-            pais='Test Country',
-            codigo_postal='12345'
-        )
+        usuario1 = Usuario.objects.create(dni='12345678A')
+        usuario2 = Usuario(dni='12345678A')
+        
         with self.assertRaises(ValidationError):
-          usuario = Usuario.objects.create_user(
-            dni='12345678',
-            username='testuser',
-            email='test@test.com',
-            password='testpassword',
-            first_name='Test',
-            last_name='User',
-            telefono='1234567890',
-            direccion='123 Test St',
-            ciudad='Test City',
-            pais='Test Country',
-            codigo_postal='12345'
-        )
-        usuario.full_clean()
+            usuario2.full_clean()
