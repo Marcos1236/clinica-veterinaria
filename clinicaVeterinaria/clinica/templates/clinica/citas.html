@@ -140,7 +140,7 @@
                         {% if not cita.esCliente%}
                             {% if not cita.tratamiento or not cita.medicacion %}
                                 <button data-bs-toggle="modal" data-bs-target="#modalModificarHistorial" 
-                                        data-info="{{ cita.citas_id }}" class="btn btn-danger" id="botonModificarHistorial-{{ cita.id }}">
+                                        data-info="{{ cita.citas_id }}" class="btn btn-info" id="botonModificarHistorial-{{ cita.id }}">
                                     <label class="me-2">Modificar historial</label>
                                     <i class="fa-solid fa-pen"></i>
                                 </button>

@@ -6,7 +6,7 @@ from . import views
 
 urlpatterns = [
     path("", views.index, name="index"),
-    path('generateCode/', views.generateCode, name='generateCode'),
+    path('custom_admin/', views.custom_admin, name='custom_admin'),
     path("login/", views.login, name="login"),
     path("logout/", views.logout, name="logout"),
     path("registerClient/", views.registerClient, name="registerClient"),
@@ -27,8 +27,4 @@ urlpatterns = [
     path("rejectRequest/", views.rejectRequest, name="rejectRequest"),
     path("historialMedico/<int:id>", views.historialMedico, name="historialMedico"),
     path("modificarHistorial/", views.modificarHistorial, name="modificarHistorial"),
-
 ]
-
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

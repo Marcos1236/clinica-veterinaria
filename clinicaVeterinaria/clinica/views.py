@@ -6,24 +6,19 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from channels.testing import WebsocketCommunicator
 from django.contrib import messages
-from django.views.generic import TemplateView
-from django.http import JsonResponse
 from .forms import *
 from .models import *
-from clinicaVeterinaria.asgi import application
-from .decorators import es_cliente, es_veterinario
-from django.http import HttpResponse, HttpResponseForbidden
+from django.http import HttpResponseForbidden
 from datetime import datetime, timedelta
 from django.core.paginator import Paginator
+from collections import Counter
 import random
 import string
 import json
-import traceback
 
 FECHA_HORA_VALIDA = 0
 FECHA_HORA_ANTIGUA = 1
 VET_NO_DISPONIBLES = 2
-
 
 def index(request):
     if request.user.is_authenticated:
@@ -31,7 +26,8 @@ def index(request):
     return render(request, "clinica/pantallaCarga.html")
 
 @staff_member_required
-def generateCode(request):
+def custom_admin(request):
+
     if request.method == 'POST':
         form = GenerarCodigoForm(request.POST)
         if form.is_valid():
@@ -41,14 +37,44 @@ def generateCode(request):
                 codigo = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
                 CodigoRegistro.objects.create(codigo=codigo)
             messages.success(request, f'Se han generado {cantidad} códigos nuevos.')
-            return redirect('generateCode')
+            return redirect('custom_admin')
         else:
             showErrors(request, form)
     else:
         form = GenerarCodigoForm()
     
-    codigos = CodigoRegistro.objects.all()
-    return render(request, 'clinica/generateCode.html', {'form': form, 'codigos': codigos})
+        dni_clientes = Cliente.objects.values_list('dni', flat=True)
+        clientes = Usuario.objects.filter(dni__in=dni_clientes)
+        paginator = Paginator(clientes, 10)  
+        page_number = request.GET.get('page')
+        usuarios_clientes = paginator.get_page(page_number)
+
+        total_clients = Cliente.objects.count()
+        total_vets = Veterinario.objects.count()
+        average_pets_per_client = Mascota.objects.count() / total_clients if total_clients > 0 else 0
+
+        citas = Citas.objects.all()
+        citas_por_dia = Counter([cita.fecha.date().weekday() for cita in citas]) 
+        days_data = [citas_por_dia.get(i, 0) for i in range(7)]
+
+        citas_por_mes = Counter([cita.fecha.date().month for cita in citas])
+        months_data = [citas_por_mes.get(i, 0) for i in range(1, 13)]
+
+        codigos = CodigoRegistro.objects.all()
+
+    context = {
+        'index_title': 'Estadísticas Administrativas',
+        'average_pets_per_client': average_pets_per_client,
+        'total_clients': total_clients,
+        'total_vets': total_vets,
+        'days_data': json.dumps(days_data),
+        'months_data': json.dumps(months_data),
+        'form': form, 
+        'codigos': codigos,
+        'clientes': usuarios_clientes,
+    }
+
+    return render(request, 'clinica/custom_admin.html', context)
 
 def registerClient(request):
     if request.user.is_authenticated:
@@ -133,6 +159,9 @@ def logout(request):
 @login_required
 def calendar(request):
     user = Usuario.objects.get(dni=request.user.dni)
+
+    if user.is_superuser:
+        return redirect('custom_admin')
 
     if Cliente.objects.filter(dni=request.user).exists():
         mascotas = Mascota.objects.filter(dni=user.dni)

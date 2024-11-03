@@ -13,6 +13,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copiar el resto de la aplicación
 COPY . .
 
+RUN python manage.py collectstatic --noinput
+
 # Exponer el puerto que usará Nginx
 EXPOSE 8000
 

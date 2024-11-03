@@ -34,10 +34,7 @@ LANGUAGES = [
 SECRET_KEY = 'django-insecure-mcyjmacpg*#gk3gyw8zjbgu^hysu!cq#p+8*sj(ut#a4v2gwpv'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
-
+DEBUG = False
 
 # Application definition
 
@@ -68,6 +65,7 @@ MESSAGE_TAGS = {
 }
 
 LOGIN_URL = '/login/'
+ADMIN_URL = '/login/'
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
@@ -108,7 +106,7 @@ DATABASES = {
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:8000",
-    "http://127.0.0.1:8000",
+    "http://127.0.0.1:8000"
 ]
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
@@ -150,7 +148,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / "static"]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_DIRS = []
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'

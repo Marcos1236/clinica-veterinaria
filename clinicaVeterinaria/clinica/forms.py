@@ -141,22 +141,25 @@ class EditCitaForm(forms.ModelForm):
     
 class PasswordChangeForm(DjangoPasswordChangeForm):
     def __init__(self, *args, **kwargs):
-        super(PasswordChangeForm, self).__init__(*args, **kwargs)
-        
-        self.fields['old_password'].error_messages = {
-            'required': 'Por favor, introduce tu contraseña actual.',
-            'invalid': 'La contraseña actual que has ingresado es incorrecta.'
-        }
-        
-        self.fields['new_password1'].error_messages = {
-            'required': 'Debes introducir una nueva contraseña.',
-            'password_mismatch': 'Las contraseñas no coinciden.',
-            'password_too_common': 'Esta contraseña es demasiado común. Elige otra.'
-        }
+        super().__init__(*args, **kwargs)
 
-        self.fields['new_password2'].error_messages = {
-            'required': 'Debes confirmar tu nueva contraseña.',
-            'password_mismatch': 'Las contraseñas no coinciden.'
-        }
-    
-    
+    def clean_old_password(self):
+        old_password = self.cleaned_data.get("old_password")
+        if not self.user.check_password(old_password):
+            raise forms.ValidationError('Tu contraseña actual es incorrecta.')
+        return old_password
+
+    def clean_new_password1(self):
+        new_password1 = self.cleaned_data.get("new_password1")
+        # Agrega aquí más validaciones si es necesario
+        if len(new_password1) < 8:
+            raise forms.ValidationError('La nueva contraseña es demasiado corta. Debe tener al menos 8 caracteres.')
+        return new_password1
+
+    def clean_new_password2(self):
+        new_password1 = self.cleaned_data.get("new_password1")
+        new_password2 = self.cleaned_data.get("new_password2")
+        if new_password1 and new_password2:
+            if new_password1 != new_password2:
+                raise forms.ValidationError('Las contraseñas no coinciden.')
+        return new_password2

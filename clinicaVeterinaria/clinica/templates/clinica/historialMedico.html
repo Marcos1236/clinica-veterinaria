@@ -36,8 +36,20 @@
                 {% for cita in citas %}
                 <tr>
                     <td>{{ cita.fecha }}</td>
-                    <td>{{ cita.tratamiento }}</td>
-                    <td>{{ cita.medicacion }}</td>
+                    <td>
+                        {% if cita.tratamiento %}
+                            {{ cita.tratamiento }}
+                        {% else %}
+                            No hay tratamiento aún
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if cita.medicacion %}
+                            {{ cita.medicacion }}
+                        {% else %}
+                            No hay medicacion aún
+                        {% endif %}
+                    </td>
 
                     {% empty %}
                     <td>{{ mascota.nombre }} no ha tenido ninguna cita aún.</td>
