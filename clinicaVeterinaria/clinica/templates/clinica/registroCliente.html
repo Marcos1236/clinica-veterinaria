@@ -56,13 +56,6 @@
                     <div class="mb-2">
                         <label for="correo" class="form-label">Correo electrónico:</label>
                         <input type="email" class="form-control form-control-sm" id="correo" name="email" value="{{ form.correo.value|default_if_none:'' }}" required>
-                        {% if form.correo.errors %}
-                            <ul class="errorlist">
-                                {% for error in form.correo.errors %}
-                                    <li class="text-danger">{{ error }}</li>
-                                {% endfor %}
-                            </ul>
-                        {% endif %}
                     </div>
 
                     <div class="mb-2">
@@ -105,25 +98,11 @@
                         <div class="col-md-6 mb-2">
                             <label for="usuario" class="form-label">Nombre de usuario:</label>
                             <input type="text" class="form-control form-control-sm" id="usuario" name="username" value="{{ form.username.value|default_if_none:'' }}" required>
-                            {% if form.username.errors %}
-                                <ul class="errorlist">
-                                    {% for error in form.username.errors %}
-                                        <li class="text-danger">{{ error }}</li>
-                                    {% endfor %}
-                                </ul>
-                            {% endif %}
                         </div>
                 
                         <div class="col-md-6 mb-2">
                             <label for="contraseña" class="form-label">Contraseña:</label>
                             <input type="password" class="form-control form-control-sm" id="contraseña" name="password1" required>
-                            {% if form.password1.errors %}
-                                <ul class="errorlist">
-                                    {% for error in form.password1.errors %}
-                                        <li class="text-danger">{{ error }}</li>
-                                    {% endfor %}
-                                </ul>
-                            {% endif %}
                         </div>
                     </div>
                 
@@ -131,13 +110,6 @@
                         <div class="col-md-6 mb-2">
                             <label for="repetir_contraseña" class="form-label">Repetir contraseña:</label>
                             <input type="password" class="form-control form-control-sm" id="repetir_contraseña" name="password2" required>
-                            {% if form.password2.errors %}
-                                <ul class="errorlist">
-                                    {% for error in form.password2.errors %}
-                                        <li class="text-danger">{{ error }}</li>
-                                    {% endfor %}
-                                </ul>
-                            {% endif %}
                         </div>
                     </div>
 

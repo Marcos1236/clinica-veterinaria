@@ -109,10 +109,10 @@
             <div class="container my-4">
                 <div class="row">
                     {% for usuario in clientes %}
-                        <div class="col-md-3 mb-4"> <!-- Cambiado a col-md-3 para hacer las tarjetas más pequeñas -->
-                            <div class="card">
-                                <img src="{{ usuario.foto.url }}" class="card-img-top" alt="Foto de {{ usuario.first_name }}">
-                                <div class="card-body">
+                        <div class="col-md-3 mb-4 d-flex"> 
+                            <div class="card w-100">
+                                <img src="{{ usuario.foto.url }}" class="card-img-top img-fluid" alt="Foto de {{ usuario.first_name }}" style="height: 200px; object-fit: cover;">
+                                <div class="card-body d-flex flex-column">
                                     <h5 class="card-title">{{ usuario.first_name }} {{ usuario.last_name }}</h5>
                                     <p class="card-text">
                                         <strong>DNI:</strong> {{ usuario.dni }}<br>

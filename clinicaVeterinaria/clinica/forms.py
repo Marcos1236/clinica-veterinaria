@@ -18,10 +18,6 @@ class RegistroForm(UserCreationForm):
     class Meta:
         model = Usuario
         fields = ['username', 'first_name', 'last_name', 'email', 'dni', 'telefono', 'direccion', 'ciudad', 'pais', 'codigo_postal', 'password1', 'password2']
-    
-    def clean(self):
-       if len(self.password1) < 8:
-        raise forms.ValidationError('La contraseña debe tener al menos 8 caracteres.')
        
     def clean_dni(self):
         dni = self.cleaned_data.get('dni')

@@ -30,7 +30,7 @@ services:
   nginx:
     image: nginx:latest
     volumes:
-      - ./static:/staticfiles
+      - ./static:/static
       - ./media:/media
       - ./nginx.conf:/etc/nginx/nginx.conf  
     ports:
