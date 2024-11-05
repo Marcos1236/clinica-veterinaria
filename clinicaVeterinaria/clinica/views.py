@@ -49,6 +49,12 @@ def custom_admin(request):
         page_number = request.GET.get('page')
         usuarios_clientes = paginator.get_page(page_number)
 
+        dni_vet = Veterinario.objects.values_list('dni', flat=True)
+        veterinarios = Veterinario.objects.filter(dni__in=dni_vet)
+        paginator = Paginator(veterinarios, 10)  
+        page_number = request.GET.get('page')
+        usuarios_Veterinarios= paginator.get_page(page_number)
+
         total_clients = Cliente.objects.count()
         total_vets = Veterinario.objects.count()
         average_pets_per_client = Mascota.objects.count() / total_clients if total_clients > 0 else 0
@@ -72,6 +78,7 @@ def custom_admin(request):
         'form': form, 
         'codigos': codigos,
         'clientes': usuarios_clientes,
+        'veterinarios' : usuarios_Veterinarios,
     }
 
     return render(request, 'clinica/custom_admin.html', context)
