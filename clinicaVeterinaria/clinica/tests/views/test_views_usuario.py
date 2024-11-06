@@ -39,16 +39,16 @@ class UsuarioViewTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('calendar'))
 
-    def test_generate_code_view(self):
+    def test_custom_admin_view(self):
         # Login sin ser admin
         self.client.login(username='testuser', password='12345')
-        response = self.client.get(reverse('generateCode'))
+        response = self.client.get(reverse('custom_admin'))
         self.assertEqual(response.status_code, 302) 
-        self.assertRedirects(response, '/admin/login/?next=' + reverse('generateCode'))
+        self.assertRedirects(response, '/calendar/')
 
-        response = self.client.post(reverse('generateCode'), {'cantidad': 1})
+        response = self.client.post(reverse('custom_admin'), {'cantidad': 1})
         self.assertEqual(response.status_code, 302)  
-        self.assertRedirects(response, '/admin/login/?next=' + reverse('generateCode'))
+        self.assertRedirects(response, '/calendar/')
 
         self.client.logout()
 
@@ -57,7 +57,7 @@ class UsuarioViewTest(TestCase):
         self.user.save()
         self.client.login(username='testuser', password='12345')
 
-        response = self.client.post(reverse('generateCode'), {'cantidad': 1})
+        response = self.client.post(reverse('custom_admin'), {'cantidad': 1})
         self.assertEqual(response.status_code, 302)  
         self.assertTrue(CodigoRegistro.objects.filter(utilizado=False).exists())
 
@@ -96,12 +96,12 @@ class UsuarioViewTest(TestCase):
 
     def test_access_client_profile_view(self):
         User = get_user_model() 
-        self.user = User.objects.create_user(dni='123456278Z', username='testuser', password='123456789')
+        self.user = User.objects.create_user(dni='123456278Z', username='testuser2', password='123456789')
         self.cliente = Cliente.objects.create(dni=self.user)
 
         # Asegúrate de que el usuario puede acceder a su perfil
-        self.client.login(username='testuser', password='123456789')
-        response = self.client.get(reverse('profile', args=[self.user.id]))  
+        self.client.login(username='testuser2', password='123456789')
+        response = self.client.get(reverse('profile'))  
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'clinica/perfilUsuario.html')  
 

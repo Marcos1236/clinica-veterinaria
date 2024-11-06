@@ -18,7 +18,27 @@ class RegistroForm(UserCreationForm):
     class Meta:
         model = Usuario
         fields = ['username', 'first_name', 'last_name', 'email', 'dni', 'telefono', 'direccion', 'ciudad', 'pais', 'codigo_postal', 'password1', 'password2']
-       
+    
+    def clean_password1(self):
+        password1 = self.cleaned_data.get("password1")
+        if len(password1) < 8:
+            raise forms.ValidationError('La contraseña es demasiado corta. Debe tener al menos 8 caracteres.')
+        return password1
+
+    def clean_password2(self):
+        password1 = self.cleaned_data.get("password1")
+        password2 = self.cleaned_data.get("password2")
+        if password1 and password2:
+            if password1 != password2:
+                raise forms.ValidationError('Las contraseñas no coinciden.')
+        return password2
+    
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        
+        if Usuario.objects.filter(username=username).exists():
+            raise forms.ValidationError("Ya existe un usuario con ese nombre de usuario.")
+        return username
     def clean_dni(self):
         dni = self.cleaned_data.get('dni')
         

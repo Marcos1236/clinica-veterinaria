@@ -25,8 +25,13 @@ def index(request):
         return redirect('calendar')
     return render(request, "clinica/pantallaCarga.html")
 
-@staff_member_required
+@login_required
 def custom_admin(request):
+
+    user = Usuario.objects.get(dni=request.user.dni)
+
+    if not user.is_superuser:
+        return redirect('calendar')
 
     if request.method == 'POST':
         form = GenerarCodigoForm(request.POST)
@@ -50,7 +55,7 @@ def custom_admin(request):
         usuarios_clientes = paginator.get_page(page_number)
 
         dni_vet = Veterinario.objects.values_list('dni', flat=True)
-        veterinarios = Veterinario.objects.filter(dni__in=dni_vet)
+        veterinarios = Usuario.objects.filter(dni__in=dni_vet)
         paginator = Paginator(veterinarios, 10)  
         page_number = request.GET.get('page')
         usuarios_Veterinarios= paginator.get_page(page_number)
@@ -316,7 +321,7 @@ def myPets(request):
 
             pets = Mascota.objects.filter(dni=client)
 
-            return render(request, 'clinica/mascotas.html', {'pets': pets})
+            return render(request, 'clinica/mascotas.html', {'pets': pets, 'razas' : RAZAS_VALIDAS})
         except Cliente.DoesNotExist:
             return HttpResponseForbidden("No tienes permiso para acceder a esta página.")
     else:
@@ -535,7 +540,7 @@ def historialMedico(request, id):
 
     if Cliente.objects.filter(dni=user.dni).exists():
         now = timezone.now()
-        citas = Citas.objects.filter(idM=id, fecha__lt=now)
+        citas = Citas.objects.filter(idM=id, fecha__lt=now, aceptada=True)
 
         mascota = get_object_or_404(Mascota, id=id)
     elif Veterinario.objects.filter(dni=user.dni).exists():

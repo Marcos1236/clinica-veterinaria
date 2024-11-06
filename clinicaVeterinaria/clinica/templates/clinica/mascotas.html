@@ -75,7 +75,12 @@
                     </div>
                     <div class="mb-3">
                         <label for="petBreed" class="form-label">Raza</label>
-                        <input type="text" class="form-control" id="petBreed" name="raza" required>
+                        <select class="form-select" id="raza" name="raza" required>
+                            <option value="">Seleccione una raza</option>
+                            {% for raza in razas %}
+                                <option value="{{ raza }}">{{ raza }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
                     <div class="mb-3">
                         <label for="petDescription" class="form-label">Descripción</label>

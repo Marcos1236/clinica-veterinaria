@@ -274,10 +274,10 @@
                     <div class="mb-3">
                         <label for="horaCitaCrear" class="form-label">Hora</label>
                         <select class="form-select" id="hora" name="hora" required>
-                        <option value="">Seleccione una hora</option>
-                        {% for hora in horas %}
-                            <option value="{{ hora }}">{{ hora }}</option>
-                        {% endfor %}
+                            <option value="">Seleccione una hora</option>
+                            {% for hora in horas %}
+                                <option value="{{ hora }}">{{ hora }}</option>
+                            {% endfor %}
                         </select>
                     </div>
                     <button type="submit" class="btn btn-primary">Modificar</button>
